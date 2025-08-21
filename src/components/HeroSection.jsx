@@ -34,7 +34,7 @@ const HeroSection = () => {
       style={{ backgroundImage: "url('/Images/hero-bg.png')" }}
     >
       {/* Content */}
-      <div className="relative z-10 w-full max-w-6xl mx-auto">
+      <div className="relative z-10 w-full max-w-6xl mx-auto hero-content">
         
         {/* Animated Heading */}
         <motion.h1
@@ -49,11 +49,11 @@ const HeroSection = () => {
             animate={{ opacity: 1, y: -10 }}
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.6 }}
-            className={`${words[currentWord].color} drop-shadow-lg text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold`}
+            className={`${words[currentWord].color} drop-shadow-lg text-4xl sm:text-5xl md:text-7xl lg:text-8xl `}
           >
             {words[currentWord].text}
           </motion.span>
-          <span className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mt-2 md:mt-0">
+          <span className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-semibold text-gray-900 mt-2 md:mt-0">
             a Business, Now Simplified !!
           </span>
         </motion.h1>
@@ -65,7 +65,7 @@ const HeroSection = () => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.7 }}
           data-aos="fade-up"
-          className="text-base sm:text-lg md:text-xl text-gray-700 mb-8 md:mb-10 max-w-2xl mx-auto px-4"
+          className="text-base sm:text-lg md:text-2xl text-gray-700 mb-8 md:mb-10 max-w-3xl mx-auto px-4"
         >
           India's First AI Powered Business Super Application For{" "}
           <span className="font-semibold text-black">SME</span>
@@ -82,9 +82,9 @@ const HeroSection = () => {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="bg-yellow-400 text-black font-semibold px-6 py-3 rounded-full flex items-center gap-2 shadow-md hover:bg-yellow-500 transition w-full sm:w-auto justify-center"
+            className="bg-yellow-400 text-black text-xl  px-6 py-3 rounded-full flex items-center gap-2 shadow-md hover:bg-yellow-500 transition w-full sm:w-auto justify-center"
           >
-            Get Started With <span className="font-bold">Your Business</span>
+            Get Started  <span className="font-bold">Your Business</span>
             <FaArrowRight />
           </motion.button>
 
@@ -92,22 +92,22 @@ const HeroSection = () => {
           <motion.button
             initial="initial"
             whileHover="hovered"
-            className="flex items-center gap-3 text-black font-medium border-b-2 border-yellow-400 hover:border-b-0 transition cursor-pointer py-2 sm:py-0 justify-center sm:justify-start"
+            className="flex items-center gap-3 text-black font-medium border-b-2 border-yellow-400 hover:border-b-0 transition cursor-pointer py-2 sm:py-0 justify-center sm:justify-start text-xl"
           >
             {/* Expanding circle effect */}
             <motion.span
               variants={{
                 initial: {
-                  width: 8,
-                  height: 8,
+                  width: 12,
+                  height: 12,
                   borderRadius: 9999,
                   backgroundColor: "rgba(0,0,0,0)",
                   borderColor: "#facc15",
                   borderWidth: 2,
                 },
                 hovered: {
-                  width: 41,
-                  height: 41,
+                  width: 48,
+                  height: 48,
                   borderRadius: 9999,
                   backgroundColor: "#facc15",
                   borderColor: "#facc15",
@@ -125,7 +125,7 @@ const HeroSection = () => {
                 transition={{ type: "spring", stiffness: 400, damping: 22, delay: 0.05 }}
                 style={{ color: "black" }}
               >
-                <FaArrowRight size={12} />
+                <FaArrowRight size={19} />
               </motion.span>
             </motion.span>
             Existing Company
@@ -138,7 +138,7 @@ const HeroSection = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8, duration: 0.6 }}
           data-aos="fade-up"
-          className="text-lg sm:text-xl md:text-2xl font-semibold mb-6 md:mb-10 text-black px-4"
+          className="text-lg sm:text-xl md:text-3xl font-semibold mb-6 md:mb-10 text-black px-4"
         >
           More than 25,000 clients
         </motion.h2>
@@ -146,7 +146,7 @@ const HeroSection = () => {
 
       
 
-           <div>
+           <div className="py-6 md:py-12 ">
              <PaymentLogs />
            </div>
 

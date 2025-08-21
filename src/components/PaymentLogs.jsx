@@ -20,12 +20,27 @@ const PaymentLogs = () => {
     { icon: <FaCcAmazonPay className="text-yellow-600" />, key: "amazon" },
     { icon: <FaGooglePay className="text-green-500" />, key: "google" },
     { icon: <FaStripe className="text-indigo-500" />, key: "stripe" },
-    { icon: <span className="text-sm sm:text-base font-semibold px-3 py-1 rounded bg-blue-100 text-blue-600">Affirm</span>, key: "affirm" },
-    { icon: <span className="text-sm sm:text-base font-semibold px-3 py-1 rounded bg-gray-200 text-gray-800">Paysafe</span>, key: "paysafe" },
+    {
+      icon: (
+        <span className="text-sm sm:text-base font-semibold px-3 py-1 rounded bg-blue-100 text-blue-600">
+          Affirm
+        </span>
+      ),
+      key: "affirm",
+    },
+    {
+      icon: (
+        <span className="text-sm sm:text-base font-semibold px-3 py-1 rounded bg-gray-200 text-gray-800">
+          Paysafe
+        </span>
+      ),
+      key: "paysafe",
+    },
   ];
 
-  // Duplicate items for infinite loop effect
-  const marqueeItems = [...paymentItems, ...paymentItems];
+  // Repeat many times to simulate infinite loop
+  const repeatCount = 10; // increase for smoother loop
+  const marqueeItems = Array.from({ length: repeatCount }, () => paymentItems).flat();
 
   return (
     <div className="w-full overflow-hidden py-6">
@@ -34,7 +49,7 @@ const PaymentLogs = () => {
         animate={{ x: ["0%", "-50%"] }}
         transition={{
           repeat: Infinity,
-          duration: 20, // Adjust speed
+          duration: 50, // Adjust speed
           ease: "linear",
         }}
       >
@@ -43,7 +58,7 @@ const PaymentLogs = () => {
             key={key + i}
             whileHover={{ scale: 1.2, rotate: 5 }}
             transition={{ type: "spring", stiffness: 300 }}
-            className="cursor-pointer text-3xl sm:text-4xl md:text-5xl flex items-center"
+            className="cursor-pointer text-3xl sm:text-4xl md:text-6xl flex items-center"
           >
             {icon}
           </motion.div>

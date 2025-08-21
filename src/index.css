@@ -2,5 +2,11 @@
 
 @import "aos/dist/aos.css";
 
+body{
+    font-family: "Poppins", sans-serif !important;
+}
 
 
+.hero-content{
+    padding-top: 150px;
+}
