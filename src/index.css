@@ -74,3 +74,27 @@ body{
     color: white !important;
     border-radius: 0px !important;
 }
+.navitems {
+  font-size: 18px; /* default size for large screens */
+}
+
+/* Tablet (max-width: 1024px) */
+@media (max-width: 1324px) {
+  .navitems {
+    font-size: 10px !important;
+  }
+}
+
+/* Mobile (max-width: 768px) */
+@media (max-width: 768px) {
+  .navitems {
+    font-size: 14px;
+  }
+}
+
+/* Small mobile (max-width: 480px) */
+@media (max-width: 480px) {
+  .navitems {
+    font-size: 12px;
+  }
+}

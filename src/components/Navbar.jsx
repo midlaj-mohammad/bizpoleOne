@@ -39,17 +39,21 @@ export default function Navbar() {
           isScrolled ? "bg-white shadow-md" : "bg-transparent"
         }`}
       >
-        <div className="container mx-auto px-4 flex items-center justify-between py-5">
+        <div className="container mx-auto px-4 flex items-center justify-between py-4 md:py-5">
           {/* Logo */}
           <div
             onClick={() => navigate("/")}
             className="cursor-pointer flex items-center"
           >
-            <img src="/Images/logo.png" alt="Bizpole Logo" className="h-17" />
+            <img
+              src="/Images/logo.png"
+              alt="Bizpole Logo"
+              className="h-12 md:h-14 lg:h-16"
+            />
           </div>
 
           {/* Desktop Menu */}
-          <ul className="hidden md:flex gap-12 font-medium text-xl">
+          <ul className="navitems hidden md:flex gap-6 lg:gap-10 xl:gap-12 font-medium text-sm md:text-base lg:text-lg">
             {navItems.map((item, index) => (
               <li key={index}>
                 <button
@@ -67,14 +71,14 @@ export default function Navbar() {
           </ul>
 
           {/* Right Side Buttons */}
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-3 lg:gap-4 xl:gap-6">
             {/* Sign In Button */}
             <motion.button
               whileHover="hover"
               initial="rest"
               animate="rest"
               onClick={() => setShowSignin(true)}
-              className="relative overflow-hidden px-5 py-2 text-sm font-medium rounded-full cursor-pointer bg-[#fbbf24] text-black"
+              className="relative overflow-hidden px-3 md:px-4 lg:px-5 py-2 text-xs md:text-sm lg:text-base font-medium rounded-full cursor-pointer bg-[#fbbf24] text-black"
             >
               <motion.span
                 variants={{
@@ -86,7 +90,9 @@ export default function Navbar() {
                   isScrolled ? "bg-white" : "bg-[#fbbf24]"
                 } -translate-x-1/2`}
               />
-              <span className="relative z-10 text-xl">Sign In</span>
+              <span className="relative z-10 text-sm md:text-base lg:text-lg navitems">
+                Sign In 
+              </span>
             </motion.button>
 
             {/* Get Start Your Business Button */}
@@ -94,8 +100,8 @@ export default function Navbar() {
               whileHover="hover"
               initial="rest"
               animate="rest"
-              onClick={() => navigate("/startbusiness")} // ✅ Desktop Navigate
-              className="relative overflow-hidden px-5 py-2 text-sm font-semibold rounded-full text-black cursor-pointer bg-white shadow-md"
+              onClick={() => navigate("/startbusiness")}
+              className="relative overflow-hidden px-3 md:px-4 lg:px-5 py-2 text-xs md:text-sm lg:text-base font-semibold rounded-full text-black cursor-pointer bg-white shadow-md"
             >
               <motion.span
                 variants={{
@@ -105,7 +111,7 @@ export default function Navbar() {
                 transition={{ duration: 0.4, ease: "easeInOut" }}
                 className="absolute left-1/2 top-0 h-full bg-[#fbbf24] -translate-x-1/2"
               />
-              <span className="relative z-10 text-xl">
+              <span className="relative z-10 text-sm md:text-base lg:text-lg navitems">
                 Get Start Your <span className="font-bold">Business</span>
               </span>
             </motion.button>
@@ -114,7 +120,7 @@ export default function Navbar() {
           {/* Mobile Menu Button */}
           <button
             className={`md:hidden ${
-              isScrolled ? "text-gray-800" : "text-white"
+              isScrolled ? "text-gray-800" : "text-black"
             }`}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
@@ -132,7 +138,7 @@ export default function Navbar() {
               transition={{ duration: 0.3 }}
               className="md:hidden bg-white shadow-lg"
             >
-              <ul className="flex flex-col px-6 py-4 space-y-4 text-gray-800">
+              <ul className="flex flex-col px-6 py-4 space-y-4 text-gray-800 text-base">
                 {navItems.map((item, index) => (
                   <li key={index}>
                     <button
@@ -172,8 +178,8 @@ export default function Navbar() {
                     initial="rest"
                     animate="rest"
                     onClick={() => {
-                      navigate("/startbusiness"); // ✅ Mobile Navigate
-                      setMobileMenuOpen(false); // close after click
+                      navigate("/startbusiness");
+                      setMobileMenuOpen(false);
                     }}
                     className="relative overflow-hidden w-full py-2 rounded-full font-semibold text-black bg-white border border-black"
                   >
