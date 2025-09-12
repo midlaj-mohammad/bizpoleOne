@@ -4,12 +4,11 @@ import { useNavigate } from "react-router-dom";
 import { FaBars, FaTimes } from "react-icons/fa";
 import SigninModal from "./Modals/SigninModal";
 
-
 export default function Navbar() {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [showSignin, setShowSignin] = useState(false); // ✅ Added state
+  const [showSignin, setShowSignin] = useState(false);
 
   const navItems = [
     { label: "Services", path: "/services" },
@@ -36,7 +35,7 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300  ${
+        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
           isScrolled ? "bg-white shadow-md" : "bg-transparent"
         }`}
       >
@@ -44,7 +43,7 @@ export default function Navbar() {
           {/* Logo */}
           <div
             onClick={() => navigate("/")}
-            className="cursor-pointer flex items-center cursor-pointer"
+            className="cursor-pointer flex items-center"
           >
             <img src="/Images/logo.png" alt="Bizpole Logo" className="h-17" />
           </div>
@@ -74,8 +73,8 @@ export default function Navbar() {
               whileHover="hover"
               initial="rest"
               animate="rest"
-              onClick={() => setShowSignin(true)} // ✅ Modal Trigger
-              className={`relative overflow-hidden px-5 py-2 text-sm font-medium rounded-full cursor-pointer  bg-[#fbbf24] text-black`}
+              onClick={() => setShowSignin(true)}
+              className="relative overflow-hidden px-5 py-2 text-sm font-medium rounded-full cursor-pointer bg-[#fbbf24] text-black"
             >
               <motion.span
                 variants={{
@@ -90,11 +89,12 @@ export default function Navbar() {
               <span className="relative z-10 text-xl">Sign In</span>
             </motion.button>
 
-            {/* ✅ Keep this as you said - DO NOT REMOVE */}
+            {/* Get Start Your Business Button */}
             <motion.button
               whileHover="hover"
               initial="rest"
               animate="rest"
+              onClick={() => navigate("/startbusiness")} // ✅ Desktop Navigate
               className="relative overflow-hidden px-5 py-2 text-sm font-semibold rounded-full text-black cursor-pointer bg-white shadow-md"
             >
               <motion.span
@@ -113,7 +113,9 @@ export default function Navbar() {
 
           {/* Mobile Menu Button */}
           <button
-            className={`md:hidden ${isScrolled ? "text-gray-800" : "text-white"}`}
+            className={`md:hidden ${
+              isScrolled ? "text-gray-800" : "text-white"
+            }`}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
@@ -148,7 +150,7 @@ export default function Navbar() {
                     whileHover="hover"
                     initial="rest"
                     animate="rest"
-                    onClick={() => setShowSignin(true)} // ✅ Modal Trigger
+                    onClick={() => setShowSignin(true)}
                     className="relative overflow-hidden w-full py-2 rounded-full bg-white text-black font-medium"
                   >
                     <motion.span
@@ -157,18 +159,22 @@ export default function Navbar() {
                         hover: { width: "100%", opacity: 1 },
                       }}
                       transition={{ duration: 0.4, ease: "easeInOut" }}
-                      className="absolute left-1/2 top-0 h-full bg-[#fbbf24] -translate-x-1/2"
+                      className="absolute left-1/2 top-0 h-full bg-[#F3C625] -translate-x-1/2"
                     />
                     <span className="relative z-10">Sign In</span>
                   </motion.button>
                 </li>
 
-                {/* ✅ Keep this - DO NOT REMOVE */}
+                {/* Get Start Your Business Button Mobile */}
                 <li>
                   <motion.button
                     whileHover="hover"
                     initial="rest"
                     animate="rest"
+                    onClick={() => {
+                      navigate("/startbusiness"); // ✅ Mobile Navigate
+                      setMobileMenuOpen(false); // close after click
+                    }}
                     className="relative overflow-hidden w-full py-2 rounded-full font-semibold text-black bg-white border border-black"
                   >
                     <motion.span

@@ -137,7 +137,7 @@ const SigninModal = ({ isOpen = true, onClose = () => {} }) => {
                     height="16" 
                     viewBox="0 0 24 24" 
                     fill="none"
-                    animate={{ rotate: isHovered ? 90 : 0 }}
+                    animate={{ rotate: isHovered ? 0 : 0 }}
                     transition={{ duration: 0.3 }}
                   >
                     <path 
@@ -278,7 +278,7 @@ const SigninModal = ({ isOpen = true, onClose = () => {} }) => {
                     height="16" 
                     viewBox="0 0 24 24" 
                     fill="none"
-                    animate={{ rotate: isHovered ? -90 : 0 }}
+                    animate={{ rotate: isHovered ? 0 : 0 }}
                     transition={{ duration: 0.3 }}
                   >
                     <path 
