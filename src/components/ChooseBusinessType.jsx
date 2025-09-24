@@ -1,18 +1,29 @@
-import { motion } from "framer-motion";
-import { ArrowLeft, Building2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-
-const businessTypes = [
-  "Private Limited",
-  "Limited Liability Partnership",
-  "Partnership",
-  "Solo Entrepreneur",
-  "Sole Proprietorship",
-  "Trust",
-];
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom"; // ✅ Added
+import { motion } from "framer-motion"; // ✅ Added
+import { ArrowLeft, Building2 } from "lucide-react"; // ✅ Added
+import { getAllServiceTypes } from "../api/ServiceType";
 
 const ChooseBusinessType = ({ onBack }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const suggested = location.state?.suggested;
+
+  const [businessTypes, setBusinessTypes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    getAllServiceTypes()
+      .then((data) => {
+        setBusinessTypes(Array.isArray(data) ? data : []);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError("Failed to load business types");
+        setLoading(false);
+      });
+  }, []);
 
   return (
     <motion.div
@@ -28,7 +39,7 @@ const ChooseBusinessType = ({ onBack }) => {
           className="lg:w-1/2 bg-gray-50 p-10 flex flex-col justify-center relative bg-cover bg-center bg-no-repeat rounded-2xl"
           style={{ backgroundImage: "url('/Images/hero-bg.png')" }}
         >
-          {/* Logo at top-left */}
+          {/* Logo */}
           <img
             src="/Images/logo.png"
             alt="Logo"
@@ -54,26 +65,90 @@ const ChooseBusinessType = ({ onBack }) => {
 
           {/* Business Type Buttons */}
           <div className="grid grid-cols-2 gap-10">
-            {businessTypes.map((type, index) => (
-              <motion.div
-                key={type}
-                className="relative group flex items-center justify-between py-4 px-5 border-2 border-gray-200 rounded-xl shadow-sm bg-white hover:bg-yellow-100 hover:border-yellow-400 text-gray-800 font-medium transition-all duration-300 cursor-pointer"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.97 }}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 * index }}
-              >
-                <span>{type}</span>
+            {loading && (
+              <div className="col-span-2 text-center text-gray-500">
+                Loading business types...
+              </div>
+            )}
+            {error && (
+              <div className="col-span-2 text-center text-red-500">{error}</div>
+            )}
+            {!loading &&
+              !error &&
+              businessTypes &&
+              businessTypes.length > 0 &&
+              businessTypes.map((type, index) => {
+                const typeName = type.Service_Name || "";
+                const normalize = (str) =>
+                  str.toLowerCase().replace(/[^a-z]/gi, "");
+                // Match suggested with typeName (case-insensitive, ignore spaces and special chars)
+                const isSuggested =
+                  suggested && normalize(typeName) === normalize(suggested);
 
-                {/* Hover Learn More Button */}
-                <motion.button
-                  className="absolute right-0 top-1 cursor-pointer -translate-y-1/2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 translate-x-3 transition-all duration-300 bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-4 py-1 rounded-full shadow-md"
-                >
-                  Learn More
-                </motion.button>
-              </motion.div>
-            ))}
+                const handleTypeClick = (type) => {
+                  console.log(type,"checking");
+                  
+                  navigate("/startbusiness/about", {
+                    state: { selectedType: typeName, type: type.Id }
+                  });
+                };
+
+                return (
+                  <motion.div
+                    key={type.Id || typeName}
+                    className={`relative group flex items-center justify-between py-4 px-5 border-2 rounded-xl shadow-sm font-medium transition-all duration-300 cursor-pointer
+                      ${
+                        isSuggested
+                          ? "bg-yellow-400 border-yellow-500 text-yellow-900 scale-105 z-10 ring-2 ring-yellow-500 ring-offset-2 shadow-lg"
+                          : "bg-white border-gray-200 text-gray-800 hover:bg-yellow-100 hover:border-yellow-400"
+                      }
+                    `}
+                    whileHover={{ scale: isSuggested ? 1.08 : 1.05 }}
+                    whileTap={{ scale: 0.97 }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 * index }}
+                    onClick={()=>{handleTypeClick(type)}}
+                  >
+                    <span
+                      className={
+                        isSuggested
+                          ? "font-bold text-yellow-900 flex items-center gap-2"
+                          : ""
+                      }
+                    >
+                      {typeName}
+                      {isSuggested && (
+                        <span className="ml-2 inline-flex items-center justify-center w-5 h-5 bg-white text-yellow-500 rounded-full border-2 border-yellow-400 shadow">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-4 w-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                        </span>
+                      )}
+                    </span>
+
+                    {/* Hover Learn More Button */}
+                    <motion.button
+                      className={`absolute right-0 top-1 cursor-pointer -translate-y-1/2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 translate-x-3 transition-all duration-300 bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-4 py-1 rounded-full shadow-md ${
+                        isSuggested ? "!opacity-100 !translate-x-0" : ""
+                      }`}
+                    >
+                      Learn More
+                    </motion.button>
+                  </motion.div>
+                );
+              })}
           </div>
 
           {/* Help Section */}

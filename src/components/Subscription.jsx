@@ -1,195 +1,173 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import { getPackagesByServiceType } from "../api/ServiceType";
 import { motion } from "framer-motion";
-import { Check, X } from "lucide-react";
-
-// Plans data
-const plans = [
-  {
-    name: "Intro",
-    monthly: 19,
-    yearly: 190,
-    features: [
-      { text: "xxxxxxxx", included: true },
-      { text: "xxxxxxxxxx", included: true },
-      { text: "xxxxxxxxxx", included: true },
-      { text: "xxxxxxxxxx", included: true },
-      { text: "xxxxxxxxxx", included: true },
-    ],
-    button: "Choose",
-    highlight: false,
-  },
-  {
-    name: "Base",
-    monthly: 39,
-    yearly: 390,
-    features: [
-      { text: "xxxxxxxxxxxx", included: true },
-      { text: "xxxxxxxxxx", included: true },
-      { text: "xxxx", included: false },
-      { text: "xxxx", included: false },
-      { text: "xxxx", included: false },
-    ],
-    button: "Choose",
-    highlight: false,
-  },
-  {
-    name: "Pro",
-    monthly: 79,
-    yearly: 790,
-    features: [
-      { text: "xxxxx", included: true },
-      { text: "xxxxx", included: true },
-      { text: "xxxxx", included: true },
-      { text: "xxxxx", included: true },
-      { text: "xxxxx", included: false },
-    ],
-    button: "Try 1 month",
-    highlight: true,
-    save: "Save $40",
-  },
-  {
-    name: "Enterprise",
-    monthly: 129,
-    yearly: 1290,
-    features: [
-      { text: "xxxxx", included: true },
-      { text: "xxxx", included: true },
-      { text: "xxxx", included: true },
-      { text: "xxxx", included: true },
-      { text: "xxxx", included: true },
-    ],
-    button: "Choose",
-    highlight: false,
-  },
-];
+import { Check, X, Users, Calendar } from "lucide-react";
 
 const Subscription = () => {
-  const [billing, setBilling] = useState("monthly");
+  const [hoveredCard, setHoveredCard] = useState(null);
+  const location = useLocation();
+
+  // Packages by service type
+  const [plans, setPlans] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchPackages = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        // Get type id from location.state or localStorage
+        let typeId = 4;
+        if (location && location.state && location.state.type) {
+          typeId = location.state.type;
+        } else {
+          // fallback to localStorage if needed
+          const loc = localStorage.getItem('location');
+          if (loc) {
+            const parsed = JSON.parse(loc);
+            if (parsed && parsed.type) typeId = parsed.type;
+          }
+        }
+        const data = await getPackagesByServiceType(typeId);
+        console.log('Fetched packages:', data.data || data);
+        setPlans(data || []);
+      } catch (err) {
+        setError("Failed to load packages");
+        setPlans([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPackages();
+  }, []);
 
   return (
     <div className="w-full min-h-screen bg-white flex flex-col">
       {/* Top Navbar */}
       <div className="w-full flex justify-start items-center p-6">
-        <img src="/Images/logo.png" alt="Bizpole Logo" className="h-14" />
+         <img
+            src="/Images/logo.png"
+            alt="Logo"
+            className="absolute top-6 left-6 w-38 h-auto"
+          />
       </div>
 
       {/* Main Container */}
       <div className="flex-1 flex items-center justify-center px-4 pb-8">
-        <div className="container w-full bg-[#F3C6254D] rounded-4xl p-6 md:p-12">
-          <h2 className="text-center text-3xl md:text-4xl pb-4 font-bold text-yellow-600">
+        <div className=" custom-container  rounded-4xl p-6 md:p-12">
+          <h2 className="text-center text-3xl md:text-4xl pb-10 font-bold text-[#F3C625] ">
             The Right Plan for Your Business
           </h2>
           <p className="text-center text-gray-600 mt-2 max-w-3xl mx-auto pb-6 text-sm md:text-base">
             We have several powerful plans to showcase your business and get
-            discovered as creative entrepreneurs. Everything you need.
+            discovered as a creative entrepreneur. Everything you need.
           </p>
 
-          {/* Billing Toggle */}
-          <div className="flex justify-center items-center gap-9 mt-6">
-            <span
-              className={`cursor-pointer transition ${
-                billing === "monthly" ? "font-bold text-black" : "text-gray-500"
-              }`}
-              onClick={() => setBilling("monthly")}
+          {/* Package label */}
+          <div className="text-center mb-8 flex flex-wrap gap-3 justify-center">
+            <button className="inline-block bg-black text-white rounded-full px-4 py-2 font-medium cursor-pointer transition-colors duration-200 hover:bg-gray-900 hover:text-white">
+              Package
+            </button>
+            <button
+              className="inline-block bg-white text-black rounded-full px-4 py-2 font-medium border-2 cursor-pointer transition-colors duration-200 hover:bg-[#F3C625] hover:text-black"
+              style={{ borderColor: '#F3C625' }}
             >
-              Bill Monthly
-            </span>
-            <motion.div
-              className="w-12 h-6 bg-black rounded-full flex items-center cursor-pointer"
-              layout
-              onClick={() =>
-                setBilling(billing === "monthly" ? "annual" : "monthly")
-              }
-            >
-              <motion.div
-                layout
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                className={`w-5 h-5 rounded-full bg-yellow-400 ${
-                  billing === "monthly" ? "ml-1" : "ml-6"
-                }`}
-              />
-            </motion.div>
-            <span
-              className={`cursor-pointer transition ${
-                billing === "annual" ? "font-bold text-black" : "text-gray-500"
-              }`}
-              onClick={() => setBilling("annual")}
-            >
-              Bill Annually
-            </span>
+              Choose individual service
+            </button>
           </div>
 
           {/* Pricing Cards */}
-          <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
-            {plans.map((plan, i) => (
+          <div className="mt-10 grid grid-cols-1  sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 ">
+            {loading && (
+              <div className="col-span-4 text-center text-gray-500">Loading packages...</div>
+            )}
+            {error && (
+              <div className="col-span-4 text-center text-red-500">{error}</div>
+            )}
+            {!loading && !error && plans.length === 0 && (
+              <div className="col-span-4 text-center text-gray-500">No packages found.</div>
+            )}
+            {!loading && !error && plans.map((plan, i) => (
               <motion.div
-                key={i}
+                key={plan.id || plan.packageId || i}
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0, type: "spring", stiffness: 200 }}
+                transition={{ delay: i * 0.1, type: "spring", stiffness: 200 }}
                 whileHover={{
-                  scale: 1.07,
+                  scale: 1.02,
                   y: -15,
                   backgroundColor: "#1f1f1f",
                   color: "#ffffff",
-                  boxShadow: "0px 0px 35px rgba(243, 198, 37, 0.8)",
                 }}
-                className="relative rounded-3xl p-6 flex flex-col justify-between shadow-lg h-[490px] bg-white text-black transition-all duration-300"
+                onHoverStart={() => setHoveredCard(i)}
+                onHoverEnd={() => setHoveredCard(null)}
+                className="relative rounded-3xl p-6 flex flex-col justify-between shadow-lg md:min-w-[400px] h-[590px] bg-white text-black transition-all duration-300 group border-2"
+                style={{ borderColor: '#F3C625' }}
               >
-                {/* Save badge */}
-                {plan.save && (
-                  <span className="absolute bg-yellow-400 text-xs px-2 py-1 rounded-md -top-3 right-4">
-                    {plan.save}
+                {/* Top-right tags with icons */}
+                <div className="absolute top-4 right-4 flex gap-2 z-10">
+                  <span className="bg-white border-2 rounded-full px-3 py-1 text-xs font-semibold text-gray-700 flex items-center gap-1" style={{ borderColor: '#F3C625' }}>
+                    <Calendar size={14} className="text-gray-400" /> Yearly
+                      {/* <Users size={14} className="text-gray-400" /> */}
                   </span>
+                  {/* <span className="bg-white border-2 rounded-full px-3 py-1 text-xs font-semibold text-gray-700 flex items-center gap-1" style={{ borderColor: '#F3C625' }}>
+                    <Calendar size={14} className="text-gray-400" /> Monthly
+                  </span> */}
+                </div>
+                {/* Plan header */}
+                <div>
+                  <h3 className="text-xl md:text-2xl mb-2 mt-10  transition-colors">
+                    {plan.name || plan.PackageName || plan.packageName}
+                  </h3>
+                  <span className="md:text-4xl font-semibold" >₹{plan.price || plan.YearlyMRP || plan.amount}</span>
+                  <p className="text-lg text-gray-600 mt-2 mb-1 group-hover:text-gray-300 transition-colors">
+                    {plan.description || plan.Description}
+                  </p>
+                  <p className="text-lg font-medium mt-4 text-gray-800 group-hover:text-gray-200 transition-colors">
+                    {plan.audience || plan.Audience}
+                  </p>
+                </div>
+
+                {/* Divider */}
+                <div className="my-4 border-t border-gray-300 group-hover:border-gray-600 transition-colors"></div>
+
+                {/* Features (Services) */}
+                {plan.services && Array.isArray(plan.services) && plan.services.length > 0 && (
+                  <ul className="space-y-3 flex-1">
+                    {plan.services.map((service, idx) => (
+                      <li
+                        key={service.ID || idx}
+                        className="flex items-center gap-2 transition-colors text-gray-700 group-hover:text-white"
+                      >
+                        <span className="bg-gray-200 p-1 flex items-center justify-center group-hover:bg-[#3b393275]">
+                          <Check size={18} className="transition-colors text-gray-500" style={hoveredCard === i ? { color: '#F3C625' } : {}} />
+                        </span>
+                        <span className="text-lg font-medium">{service.ServiceName}</span>
+                     
+                      </li>
+                    ))}
+                  </ul>
                 )}
 
-                {/* Title */}
-                <h3 className="text-xl md:text-2xl font-semibold transition-colors">
-                  {plan.name}
-                </h3>
-
-                {/* Features */}
-                <ul className="mt-6 space-y-2 flex-1">
-                  {plan.features.map((f, idx) => (
-                    <li
-                      key={idx}
-                      className={`flex items-center gap-2 transition-colors ${
-                        f.included
-                          ? "text-gray-700 group-hover:text-gray-200"
-                          : "text-gray-400 line-through group-hover:text-gray-500"
-                      }`}
-                    >
-                      {f.included ? (
-                        <Check size={16} className="transition-colors" />
-                      ) : (
-                        <X size={16} className="transition-colors" />
-                      )}
-                      {f.text}
-                    </li>
-                  ))}
-                </ul>
-
-                {/* Price & Button */}
+                {/* Button */}
                 <div className="mt-6">
-                  <p className="text-xl md:text-2xl font-bold transition-colors">
-                    ${billing === "monthly" ? plan.monthly : plan.yearly}
-                    <span className="text-sm font-normal ml-1">
-                      {billing === "monthly" ? "/month" : "/year"}
-                    </span>
-                  </p>
                   <button
-                    className={`mt-4 w-full rounded-xl py-3 font-semibold transition-colors cursor-pointer ${
-                      plan.highlight
-                        ? "bg-yellow-400 text-black hover:bg-yellow-500"
-                        : "bg-yellow-100 text-black hover:bg-yellow-300"
-                    }`}
+                    className={`w-full rounded-3xl py-3 font-semibold transition-colors cursor-pointer`}
+                    style={{
+                      backgroundColor: '#F3C625',
+                      color: 'black',
+                    }}
                   >
-                    {plan.button}
+                    {plan.button || 'Get Quote  '}
                   </button>
                 </div>
               </motion.div>
             ))}
           </div>
+
+        
         </div>
       </div>
     </div>

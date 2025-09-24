@@ -1,7 +1,9 @@
   import { motion } from "framer-motion";
+  import { useNavigate } from "react-router-dom";
   import { ArrowRight, Phone, Building2, Sparkles } from "lucide-react";
 
   const StartYourBusinessContent = ({ onNext }) => {
+    const navigate = useNavigate();
     const cardVariants = {
       rest: { scale: 1, y: 0 },
       hover: {
@@ -109,10 +111,11 @@
 
       {/* Onboard Existing Company */}
       <motion.button
-        className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold py-4 px-6 rounded-xl transition-all duration-300 text-left relative overflow-hidden group"
+        className="w-full bg-yellow-400 cursor-pointer hover:bg-yellow-500 text-gray-900 font-semibold py-4 px-6 rounded-xl transition-all duration-300 text-left relative overflow-hidden group"
         variants={cardVariants}
         initial="rest"
         whileHover="hover"
+        onClick={() => navigate('/existing-companies')}
       >
         <div className="flex items-center justify-between relative z-10">
           <div>

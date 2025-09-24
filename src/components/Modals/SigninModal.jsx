@@ -1,13 +1,26 @@
+
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { loginWithPhone, verifyOtp } from "../../api/AuthApi";
+
+// Add a mode state for switching between sign-in and sign-up
 
 const SigninModal = ({ isOpen = true, onClose = () => {} }) => {
+  const navigate = useNavigate();
+  const [mode, setMode] = useState("signin"); // 'signin' or 'signup'
   const [step, setStep] = useState(1);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [signedMessage, setSignedMessage] = useState("");
   const [inputValue, setInputValue] = useState("");
   const [isHovered, setIsHovered] = useState(false);
   const [timer, setTimer] = useState(30);
   const [otpValues, setOtpValues] = useState(["", "", "", ""]);
   const modalContentRef = useRef(null);
+
+  // For sign-up extra fields
+  const [signupName, setSignupName] = useState("");
+  const [signupEmail, setSignupEmail] = useState("");
 
   // Timer countdown for OTP
   useEffect(() => {
@@ -20,8 +33,37 @@ const SigninModal = ({ isOpen = true, onClose = () => {} }) => {
     return () => clearInterval(interval);
   }, [step, timer]);
 
-  const handleNextStep = () => {
-    setStep(2);
+
+  // Next step handler for sign-in/sign-up
+  // Request OTP for both sign-in and sign-up
+  const handleNextStep = async () => {
+    if (mode === "signup") {
+      if (!signupName || !signupEmail || !inputValue) {
+        alert("Please fill all sign up fields");
+        return;
+      }
+    } else {
+      if (!inputValue) {
+        alert("Please enter your phone or email");
+        return;
+      }
+    }
+    try {
+      await loginWithPhone(inputValue);
+      setStep(2);
+    } catch (err) {
+      alert(err?.message || "Failed to send OTP");
+    }
+  };
+
+  // Switch between sign-in and sign-up
+  const handleSwitchMode = () => {
+    setMode(mode === "signin" ? "signup" : "signin");
+    setStep(1);
+    setInputValue("");
+    setOtpValues(["", "", "", ""]);
+    setSignupName("");
+    setSignupEmail("");
   };
 
   const handleBackStep = () => {
@@ -32,16 +74,35 @@ const SigninModal = ({ isOpen = true, onClose = () => {} }) => {
     setTimer(30);
   };
 
-  const handleOtpChange = (index, value) => {
+  // OTP input handler and verification
+  const handleOtpChange = async (index, value) => {
     if (value.length <= 1) {
       const newOtpValues = [...otpValues];
       newOtpValues[index] = value;
       setOtpValues(newOtpValues);
-      
       // Auto focus next input
       if (value && index < 3) {
         const nextInput = document.getElementById(`otp-${index + 1}`);
         nextInput?.focus();
+      }
+      // If all OTP fields are filled, verify OTP
+      if (index === 3 && value && newOtpValues.every((v) => v.length === 1)) {
+        setIsVerifying(true);
+        try {
+          const otp = newOtpValues.join("");
+          const tokenData = await verifyOtp(inputValue, otp);
+          setSignedMessage("Signed in successfully!");
+          setStep(3);
+          console.log("Token Data:", tokenData);
+          setTimeout(() => {
+            onClose();
+            navigate("/dashboard/bizpoleone");
+          }, 1200); // short delay for user feedback
+        } catch (err) {
+          alert(err?.message || "OTP verification failed");
+        } finally {
+          setIsVerifying(false);
+        }
       }
     }
   };
@@ -52,6 +113,7 @@ const SigninModal = ({ isOpen = true, onClose = () => {} }) => {
       prevInput?.focus();
     }
   };
+
 
   if (!isOpen) return null;
 
@@ -77,8 +139,9 @@ const SigninModal = ({ isOpen = true, onClose = () => {} }) => {
           </svg>
         </motion.button>
 
+
         <AnimatePresence mode="wait">
-          {/* Step 1 - Email / Phone */}
+          {/* Step 1 - Email / Phone (Sign In or Sign Up) */}
           {step === 1 && (
             <motion.div
               key="step1"
@@ -88,35 +151,80 @@ const SigninModal = ({ isOpen = true, onClose = () => {} }) => {
               exit={{ opacity: 0, x: 50 }}
               transition={{ duration: 0.4 }}
             >
-              <motion.h2 
+              <motion.h2
                 className="text-2xl font-bold text-gray-800 mb-2"
                 initial={{ y: -20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.1 }}
               >
-                Sign In
+                {mode === "signin" ? "Sign In" : "Sign Up"}
               </motion.h2>
 
-              <motion.div 
+              {/* For sign-up, show name and email fields */}
+              {mode === "signup" && (
+                <>
+                  <motion.div
+                    className="w-full"
+                    initial={{ y: -10, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.15 }}
+                  >
+                    <label className="block text-sm font-medium text-gray-700 mb-2 text-left">
+                      Name
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Your Name"
+                      value={signupName}
+                      onChange={(e) => setSignupName(e.target.value)}
+                      className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100 transition-all"
+                    />
+                  </motion.div>
+                  <motion.div
+                    className="w-full"
+                    initial={{ y: -10, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.18 }}
+                  >
+                    <label className="block text-sm font-medium text-gray-700 mb-2 text-left">
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      placeholder="abc@xyz.com"
+                      value={signupEmail}
+                      onChange={(e) => setSignupEmail(e.target.value)}
+                      className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100 transition-all"
+                    />
+                  </motion.div>
+                </>
+              )}
+
+              <motion.div
                 className="w-full"
                 initial={{ y: -10, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.2 }}
               >
                 <label className="block text-sm font-medium text-gray-700 mb-2 text-left">
-                  Email Address / Phone Number
+                  {mode === "signin" ? "Email Address / Phone Number" : "Phone Number"}
                 </label>
                 <input
                   type="text"
-                  placeholder="abc@xyz.com"
+                  placeholder={mode === "signin" ? "abc@xyz.com" : "Enter your phone number"}
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleNextStep();
+                    }
+                  }}
                   className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100 transition-all"
                 />
               </motion.div>
 
-              {/* Switch Button */}
-              <motion.div 
+              {/* Next Button */}
+              <motion.div
                 className="relative bg-yellow-400 rounded-full w-20 h-12 cursor-pointer shadow-lg transition-all duration-300 hover:shadow-xl"
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
@@ -127,50 +235,74 @@ const SigninModal = ({ isOpen = true, onClose = () => {} }) => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <motion.div 
+                <motion.div
                   className="absolute top-1 left-1 w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center"
                   animate={{ x: isHovered ? 32 : 0 }}
                   transition={{ type: "spring", damping: 15, stiffness: 200 }}
                 >
-                  <motion.svg 
-                    width="16" 
-                    height="16" 
-                    viewBox="0 0 24 24" 
+                  <motion.svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
                     fill="none"
                     animate={{ rotate: isHovered ? 0 : 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <path 
-                      d="M5 12h14m-7-7l7 7-7 7" 
-                      stroke="currentColor" 
-                      strokeWidth="2" 
-                      strokeLinecap="round" 
+                    <path
+                      d="M5 12h14m-7-7l7 7-7 7"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
                       strokeLinejoin="round"
                     />
                   </motion.svg>
                 </motion.div>
               </motion.div>
 
-              <motion.p 
+              <motion.p
                 className="text-sm text-center text-gray-600 leading-relaxed"
                 initial={{ y: 10, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.4 }}
               >
-                We Will send you a one time password <br /> 
-                on this <span className="font-bold text-gray-800">Mobile Number</span>
+                {mode === "signin"
+                  ? (<>
+                      We Will send you a one time password <br />
+                      on this <span className="font-bold text-gray-800">Mobile Number</span>
+                    </>)
+                  : (<>
+                      Please enter your details to sign up. <br />
+                      We will send you an OTP to verify your phone number.
+                    </>)}
               </motion.p>
 
-              <motion.p 
+              <motion.p
                 className="text-sm text-gray-600"
                 initial={{ y: 10, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.5 }}
               >
-                Don't Have An Account ? {" "}
-                <span className="font-semibold underline cursor-pointer text-gray-800 hover:text-yellow-600 transition-colors">
-                  Sign up
-                </span>
+                {mode === "signin" ? (
+                  <>
+                    Don't Have An Account ? {" "}
+                    <span
+                      className="font-semibold underline cursor-pointer text-gray-800 hover:text-yellow-600 transition-colors"
+                      onClick={handleSwitchMode}
+                    >
+                      Sign up
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    Already have an account? {" "}
+                    <span
+                      className="font-semibold underline cursor-pointer text-gray-800 hover:text-yellow-600 transition-colors"
+                      onClick={handleSwitchMode}
+                    >
+                      Sign in
+                    </span>
+                  </>
+                )}
               </motion.p>
             </motion.div>
           )}
@@ -223,6 +355,7 @@ const SigninModal = ({ isOpen = true, onClose = () => {} }) => {
                     value={otpValues[index]}
                     onChange={(e) => handleOtpChange(index, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(index, e)}
+                    disabled={isVerifying}
                     className="w-14 h-14 border-2 border-yellow-400 rounded-full text-center text-xl font-semibold outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-100 transition-all"
                     initial={{ scale: 0, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
@@ -291,6 +424,35 @@ const SigninModal = ({ isOpen = true, onClose = () => {} }) => {
                   </motion.svg>
                 </motion.div>
               </motion.div>
+              {isVerifying && <div className="text-yellow-500 font-semibold mt-2">Verifying...</div>}
+            </motion.div>
+          )}
+
+          {/* Step 3 - Signed in message */}
+          {step === 3 && (
+            <motion.div
+              key="step3"
+              className="flex flex-col items-center gap-6"
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -50 }}
+              transition={{ duration: 0.4 }}
+            >
+              <motion.h2
+                className="text-2xl font-bold text-green-600 mb-2"
+                initial={{ y: -20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.1 }}
+              >
+                {signedMessage || "Signed in!"}
+              </motion.h2>
+              <div className="text-gray-700">You are now authenticated. Check the console for your token.</div>
+              <button
+                className="mt-4 px-6 py-2 bg-yellow-400 rounded-full font-semibold text-gray-900 hover:bg-yellow-500 transition"
+                onClick={onClose}
+              >
+                Close
+              </button>
             </motion.div>
           )}
         </AnimatePresence>

@@ -33,6 +33,9 @@ import ProfileSettings from "./pages/ModernCalendar";
 import ModernCalendar from "./pages/ModernCalendar";
 import ProfileEvents from "./pages/ProfileEvents";
 import BizpoleOneTasks from "./pages/BizpoleOneTasks";
+import BusinessQuiz from "./components/Quastions";
+import BusinessQuizWizard from "./components/Quastions";
+import ExisitingCompanies from "./pages/ExisitingCompanies";
 
 function App() {
   const location = useLocation();
@@ -51,6 +54,7 @@ function App() {
     "/payments",
     "/quiz",
     "/profile",
+    "/existing-companies",
     "/dashboard", // includes /dashboard and its children
   ];
 
@@ -70,10 +74,12 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/startbusiness/*" element={<StartYourBusiness />} />
           <Route path="/checking" element={<BusinessPanel />} />
+    
           <Route path="/startbusiness/about" element={<Tellabout />} />
           <Route path="/startbusiness/subscriptions" element={<Subscription />} />
           <Route path="/payments" element={<Payment />} />
           <Route path="/quiz" element={<Quiz />} />
+          <Route path="/questions" element={<BusinessQuizWizard />} />
        <Route path="/profile" element={<ProfileLayout />}>
   <Route index element={<ProfilePage />} /> 
  <Route path="calendar" element={<CalenderPage />} />
@@ -81,7 +87,7 @@ function App() {
   <Route path="moderncalendar" element={<ModernCalendar />} />
     <Route path="events" element={<ProfileEvents />} />
 </Route>
-
+      <Route path="/existing-companies" element={<ExisitingCompanies />} />
           {/* Main Dashboard (Nested Routes) */}
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<DashboardMain />} /> {/* default */}
@@ -90,12 +96,12 @@ function App() {
             {/* BizpoleOne Nested Dashboard */}
             <Route path="bizpoleone" element={<BizpoleOneDashboardLayout />}>
               <Route index element={<BizpoleOne />} /> {/* default inside bizpoleone */}
-              <Route path="overview" element={<BizpoleOneOverview />} />
+              <Route path="package" element={<BizpoleOneOverview />} />
               <Route path="services" element={<BizpoleOneServices />} />
               <Route path="orders" element={<BizpoleOneServices />} />
               <Route path="tasks" element={<BizpoleOneTasks/>} />
-              <Route path="subscriptions" element={<BizpoleOneServices />} />
-              <Route path="settings" element={<BizpoleOneServices />} />
+              <Route path="pricing" element={<BizpoleOneServices />} />
+              <Route path="individual" element={<BizpoleOneServices />} />
             </Route>
 
           </Route>

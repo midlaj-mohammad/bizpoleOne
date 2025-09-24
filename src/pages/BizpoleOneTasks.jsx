@@ -631,43 +631,7 @@ export default function ServiceSelection() {
             </div>
           </div>
           {/* Upcoming Task Section */}
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Upcoming Task</h3>
-            <div className="overflow-x-auto">
-              <table className="min-w-full bg-white rounded-lg border border-gray-200 opacity-75">
-                <thead>
-                  <tr className="text-sm font-medium text-gray-600 bg-gray-100">
-                    <th className="py-3 px-4 text-left">Task</th>
-                    <th className="py-3 px-4 text-left">Status</th>
-                    <th className="py-3 px-4 text-left">Date</th>
-                    <th className="py-3 px-4 text-left">Progress</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredUpcomingTasks.map((task) => {
-                    let statusColor = getStatusColor(task.status);
-                    return (
-                      <tr key={task.id}>
-                        <td className="py-5 px-4 text-gray-600 flex items-center gap-2">
-                          <span className="w-6 h-6 rounded-full border-2 border-gray-300"></span>
-                          {task.title}
-                        </td>
-                        <td className="py-3 px-4">
-                          <span className={`text-xs px-3 py-1 rounded-full font-medium ${statusColor}`}>
-                            {task.status}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 text-gray-400">{task.date}</td>
-                        <td className="py-3 px-4">
-                          <div className="w-24 h-2 bg-gray-200 rounded-full"></div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
+      
         </>
       ) : activeTab === 'Documents' ? (
         <div className="bg-white rounded-lg border border-gray-200 p-6 mb-8">

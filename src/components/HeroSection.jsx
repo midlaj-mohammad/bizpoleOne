@@ -41,7 +41,7 @@ const HeroSection = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
-          className="text-black mb-4 flex flex-col md:flex-row items-center justify-center gap-2 md:gap-3"
+          className="text-black mb-4 flex flex-col  md:flex-row items-center justify-center gap-2 md:gap-3"
         >
           <motion.span
             key={words[currentWord].text}
@@ -49,7 +49,7 @@ const HeroSection = () => {
             animate={{ opacity: 1, y: -10 }}
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.6 }}
-            className={`${words[currentWord].color} drop-shadow-lg text-4xl sm:text-5xl md:text-7xl lg:text-8xl `}
+            className={`${words[currentWord].color} drop-shadow-lg text-4xl sm:text-5xl md:text-7xl lg:text-8xl w-60 inline-block text-center`}
           >
             {words[currentWord].text}
           </motion.span>
