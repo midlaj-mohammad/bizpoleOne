@@ -1,4 +1,4 @@
-import { Outlet, NavLink } from "react-router-dom";
+import { Outlet, NavLink, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   ShoppingBag,
@@ -9,6 +9,8 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
+  Box,
+  Wrench,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
@@ -16,19 +18,28 @@ import { useState } from "react";
 const BizpoleOneDashboardLayout = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [ordersOpen, setOrdersOpen] = useState(false);
+  const location = useLocation();
+
+  // Helper: is mobile
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+
+  // Helper: is Orders submenu active
+  const isOrdersActive =
+    location.pathname.startsWith("/dashboard/bizpoleone/package") ||
+    location.pathname.startsWith("/dashboard/bizpoleone/individual");
 
   return (
-    <div className="flex bg-gray-50 max-h-[100vh] min-h-[89]">
+    <div className="flex flex-col md:flex-row bg-gray-50 max-h-[100vh] min-h-[89]">
       {/* Sidebar */}
       <motion.aside
         animate={{ width: isCollapsed ? "80px" : "260px" }}
         transition={{ type: "spring", stiffness: 200, damping: 20 }}
-        className="bg-white flex flex-col justify-between shadow-sm relative"
+        className="bg-white flex flex-col justify-between shadow-sm relative min-h-[60px] md:min-h-screen w-full md:w-auto"
       >
-        {/* Collapse Button */}
+        {/* Collapse Button (hide on mobile) */}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="absolute -right-3 top-1/2 -translate-y-1/2 bg-white border rounded-full shadow-md p-1 hover:bg-gray-100 transition"
+          className="absolute -right-3 top-20 -translate-y-1/2 bg-white border rounded-full shadow-md p-1 hover:bg-gray-100 transition hidden md:block"
         >
           {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
         </button>
@@ -55,55 +66,65 @@ const BizpoleOneDashboardLayout = () => {
                 </NavLink>
               </li>
 
-              {/* Orders with dropdown */}
+              {/* Orders with dropdown (always show dropdown on mobile) */}
               <li>
                 <button
-                  onClick={() => setOrdersOpen(!ordersOpen)}
-                  className="flex items-center gap-3 px-3 py-3 rounded-lg font-medium text-gray-600 hover:bg-gray-50 w-full"
+                  onClick={() => setOrdersOpen((prev) => !prev)}
+                  className={`flex items-center gap-3 px-3 py-3 rounded-lg font-medium w-full transition-all
+                    ${isOrdersActive ? "bg-[#FFC42A] text-white shadow-inner" : "text-gray-600 hover:bg-gray-50"}
+                  `}
+                  aria-expanded={ordersOpen}
                 >
                   <ShoppingBag size={20} />
-                  {!isCollapsed && (
+                  {/* Always show label and chevron on mobile, or when expanded */}
+                  {(!isCollapsed || isMobile) && (
                     <>
                       <span>Orders</span>
                       <ChevronDown
                         size={16}
-                        className={`ml-auto transform transition-transform ${
-                          ordersOpen ? "rotate-180" : ""
-                        }`}
+                        className={`ml-auto transform transition-transform ${ordersOpen ? "rotate-180" : ""}`}
                       />
                     </>
                   )}
                 </button>
 
-                {/* Submenu */}
-                {!isCollapsed && ordersOpen && (
-                  <ul className="ml-10 mt-1 space-y-1 text-sm">
+                {/* Submenu: show if expanded, or if collapsed and open (on any device) */}
+                {ordersOpen && (
+                  <ul
+                    className={`mt-1 space-y-1 text-sm ${
+                      isCollapsed ? "ml-2" : "ml-10"
+                    }`}
+                  >
                     <li>
                       <NavLink
                         to="/dashboard/bizpoleone/package"
                         className={({ isActive }) =>
-                          `block px-2 py-2 rounded transition-all ${
+                          `flex items-center gap-2 px-2 py-2 rounded transition-all ${
                             isActive
                               ? "bg-[#FFE9A7] text-yellow-700 font-semibold shadow"
                               : "text-gray-500 hover:bg-[#FFF5D1] hover:text-yellow-700"
                           }`
                         }
+                        onClick={() => isMobile && setIsCollapsed(true)}
                       >
-                        Package Service
+                        <Box size={18} />
+                        {!isCollapsed && <span>Package Service</span>}
                       </NavLink>
                     </li>
                     <li>
                       <NavLink
                         to="/dashboard/bizpoleone/individual"
                         className={({ isActive }) =>
-                          `block px-2 py-2 rounded transition-all ${
+                          `flex items-center gap-2 px-2 py-2 rounded transition-all ${
                             isActive
                               ? "bg-[#FFE9A7] text-yellow-700 font-semibold shadow"
                               : "text-gray-500 hover:bg-[#FFF5D1] hover:text-yellow-700"
                           }`
                         }
+                        onClick={() => isMobile && setIsCollapsed(true)}
                       >
-                        Individual services
+                        <Wrench size={18} />
+                        {!isCollapsed && <span>Individual services</span>}
                       </NavLink>
                     </li>
                   </ul>

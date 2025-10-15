@@ -8,6 +8,7 @@ const ChooseBusinessType = ({ onBack }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const suggested = location.state?.suggested;
+  const isDashBoard = location.state?.navigate || false;
 
   const [businessTypes, setBusinessTypes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,11 +38,11 @@ const ChooseBusinessType = ({ onBack }) => {
         {/* Left Side */}
         <div
           className="lg:w-1/2 bg-gray-50 p-10 flex flex-col justify-center relative bg-cover bg-center bg-no-repeat rounded-2xl"
-          style={{ backgroundImage: "url('/Images/hero-bg.png')" }}
+          style={{ backgroundImage: "url('/Images/hero-bg.webp')" }}
         >
           {/* Logo */}
           <img
-            src="/Images/logo.png"
+            src="/Images/logo.webp"
             alt="Logo"
             className="absolute top-6 left-6 w-28 h-auto"
           />
@@ -78,29 +79,62 @@ const ChooseBusinessType = ({ onBack }) => {
               businessTypes &&
               businessTypes.length > 0 &&
               businessTypes.map((type, index) => {
+
                 const typeName = type.Service_Name || "";
-                const normalize = (str) =>
-                  str.toLowerCase().replace(/[^a-z]/gi, "");
-                // Match suggested with typeName (case-insensitive, ignore spaces and special chars)
-                const isSuggested =
-                  suggested && normalize(typeName) === normalize(suggested);
+                const normalize = (str) => (str || "").toLowerCase().replace(/[^a-z]/gi, "");
+
+                // Build a set of possible normalized suggestions
+                let allSuggested = [];
+                if (suggested) {
+                  // Split on common delimiters (or, /, (,), ,)
+                  let base = suggested.split(/\s*[,/()\-]|\s+or\s+/i).map(s => s.trim()).filter(Boolean);
+                  // Add original and normalized
+                  base.push(suggested);
+                  // Add some common replacements
+                  base = base.flatMap(s => [
+                    s,
+                    s.replace(/company|firm/gi, "").trim(),
+                    s.replace(/limited/gi, "ltd").trim(),
+                    s.replace(/ltd/gi, "limited").trim(),
+                    s.replace(/opc/gi, "one person company").trim(),
+                    s.replace(/one person company/gi, "opc").trim(),
+                  ]);
+                  // Remove empty and deduplicate
+                  allSuggested = Array.from(new Set(base.filter(Boolean)));
+                }
+
+                // Match only if normalized suggestion and type name are exactly equal, or if both are short and one contains the other (for abbreviations)
+                const normType = normalize(typeName);
+                const isSuggested = allSuggested.length > 0 && allSuggested.some(s => {
+                  const normS = normalize(s);
+                  if (normType === normS) return true;
+                  // Allow for short abbreviations (e.g., 'opc' vs 'onepersoncompany')
+                  if (normType.length <= 6 || normS.length <= 6) {
+                    return normType.includes(normS) || normS.includes(normType);
+                  }
+                  return false;
+                });
 
                 const handleTypeClick = (type) => {
-                  console.log(type,"checking");
-                  
-                  navigate("/startbusiness/about", {
-                    state: { selectedType: typeName, type: type.Id }
-                  });
+                  if (isDashBoard) {
+                    navigate("/startbusiness/subscriptions", { state: { type: type.Id } });
+                  }
+                  else {
+                    navigate("/startbusiness/about", {
+                      state: { selectedType: typeName, type: type.Id }
+                    });
+
+                  }
+
                 };
 
                 return (
                   <motion.div
                     key={type.Id || typeName}
                     className={`relative group flex items-center justify-between py-4 px-5 border-2 rounded-xl shadow-sm font-medium transition-all duration-300 cursor-pointer
-                      ${
-                        isSuggested
-                          ? "bg-yellow-400 border-yellow-500 text-yellow-900 scale-105 z-10 ring-2 ring-yellow-500 ring-offset-2 shadow-lg"
-                          : "bg-white border-gray-200 text-gray-800 hover:bg-yellow-100 hover:border-yellow-400"
+                      ${isSuggested
+                        ? "bg-yellow-400 border-yellow-500 text-yellow-900 scale-105 z-10 ring-2 ring-yellow-500 ring-offset-2 shadow-lg"
+                        : "bg-white border-gray-200 text-gray-800 hover:bg-yellow-100 hover:border-yellow-400"
                       }
                     `}
                     whileHover={{ scale: isSuggested ? 1.08 : 1.05 }}
@@ -108,7 +142,7 @@ const ChooseBusinessType = ({ onBack }) => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 * index }}
-                    onClick={()=>{handleTypeClick(type)}}
+                    onClick={() => { handleTypeClick(type) }}
                   >
                     <span
                       className={
@@ -140,9 +174,8 @@ const ChooseBusinessType = ({ onBack }) => {
 
                     {/* Hover Learn More Button */}
                     <motion.button
-                      className={`absolute right-0 top-1 cursor-pointer -translate-y-1/2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 translate-x-3 transition-all duration-300 bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-4 py-1 rounded-full shadow-md ${
-                        isSuggested ? "!opacity-100 !translate-x-0" : ""
-                      }`}
+                      className={`absolute right-0 top-1 cursor-pointer -translate-y-1/2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 translate-x-3 transition-all duration-300 bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-4 py-1 rounded-full shadow-md ${isSuggested ? "!opacity-100 !translate-x-0" : ""
+                        }`}
                     >
                       Learn More
                     </motion.button>
@@ -182,7 +215,7 @@ const ChooseBusinessType = ({ onBack }) => {
             className="absolute left-4 top-4 flex items-center gap-2 bg-white text-gray-800 rounded-full px-4 py-2 shadow-lg hover:bg-gray-100 cursor-pointer"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.9 }}
-            onClick={onBack}
+            onClick={isDashBoard ? () => { navigate(-1) } : onBack}
           >
             <ArrowLeft className="w-5 h-5" />
             Back

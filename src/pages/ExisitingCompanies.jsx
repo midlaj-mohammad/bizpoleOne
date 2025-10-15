@@ -3,9 +3,20 @@ import CompanyInformationForm from '../components/ExixistingCompany/CompanyInfor
 import DirectorPromoterForm from '../components/ExixistingCompany/DirectorPromoterForm';
 import RegistrationStatusForm from '../components/ExixistingCompany/RegistrationStatusForm';
 import ComplianceStatusCheck from '../components/ExixistingCompany/ComplianceStatusCheck';
+import { setSecureItem, getSecureItem } from "../utils/secureStorage";
 
 const ExisitingCompanies = () => {
-  const [step, setStep] = useState(1);
+  // Persist step in localStorage
+  const getInitialStep = () => {
+    const saved = getSecureItem("onboardingStep");
+    return saved ? Number(saved) : 1;
+  };
+  const [step, setStep] = useState(getInitialStep());
+
+  // Update localStorage when step changes
+  React.useEffect(() => {
+    setSecureItem("onboardingStep", step);
+  }, [step]);
 
   return (
     <div className="min-h-screen  bg-gray-50">

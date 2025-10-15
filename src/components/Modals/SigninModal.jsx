@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { loginWithPhone, verifyOtp } from "../../api/AuthApi";
+import { setSecureItem, getSecureItem } from "../../utils/secureStorage";
 
 // Add a mode state for switching between sign-in and sign-up
 
@@ -91,7 +92,18 @@ const SigninModal = ({ isOpen = true, onClose = () => {} }) => {
         try {
           const otp = newOtpValues.join("");
           const tokenData = await verifyOtp(inputValue, otp);
-          setSignedMessage("Signed in successfully!");
+          console.log(tokenData, "token data1");
+          
+          // Store token and user in localStorage
+          if (tokenData && tokenData.token) {
+            console.log(tokenData, "token");
+            localStorage.setItem('token', tokenData.token);
+            setSignedMessage("Signed in successfully!");
+          }
+          if (tokenData && tokenData.user) {
+           setSecureItem('user', JSON.stringify(tokenData.user));
+          }
+          
           setStep(3);
           console.log("Token Data:", tokenData);
           setTimeout(() => {

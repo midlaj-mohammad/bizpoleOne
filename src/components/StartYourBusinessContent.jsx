@@ -56,11 +56,11 @@
           {/* Right Side - Content */}
       <div
     className="lg:w-1/2 p-8 lg:p-12 flex flex-col justify-center bg-cover bg-center bg-no-repeat rounded-2xl relative"
-    style={{ backgroundImage: "url('/Images/hero-bg.png')" }}
+    style={{ backgroundImage: "url('/Images/hero-bg.webp')" }}
   >
     {/* Logo at top-right */}
     <img
-      src="/Images/logo.png"
+      src="/Images/logo.webp"
       alt="Logo"
       className="absolute top-6 right-6 w-28 h-auto"
     />

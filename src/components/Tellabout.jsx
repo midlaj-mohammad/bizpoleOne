@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { assignCustomer, createCustomer } from "../api/CustomerApi";
 import { getAllStates } from "../api/States";
-
+import { setSecureItem, getSecureItem } from "../utils/secureStorage";
 const Tellabout = () => {
   // ✅ States hook inside component
   const [states, setStates] = useState([]);
@@ -276,11 +276,11 @@ const Tellabout = () => {
       // Store token and user in localStorage if present
       if (res && res.data.token) {
         localStorage.setItem('token', res.data.token);
-        localStorage.setItem('user', JSON.stringify(res.data.user));
+        setSecureItem('user', JSON.stringify(res.data.user));
       }
       // Store and log location state
       if (location && location.state) {
-        localStorage.setItem('location', JSON.stringify(location.state));
+       setSecureItem('location', JSON.stringify(location.state));
         console.log('Location state:', location.state);
       }
       // Pass type id to subscription page

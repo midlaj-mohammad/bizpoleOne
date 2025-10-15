@@ -5,7 +5,9 @@ import "aos/dist/aos.css";
 import { FaArrowRight } from "react-icons/fa";
 
 
-import PaymentLogs from "./PaymentLogs";
+
+import { Suspense, lazy } from "react";
+const PaymentLogs = lazy(() => import("./PaymentLogs"));
 
 const HeroSection = () => {
   // Animated words for heading
@@ -31,7 +33,7 @@ const HeroSection = () => {
   return (
     <section
       className="relative bg-cover bg-center min-h-screen flex  flex-col items-center justify-center px-4 sm:px-6 py-12 md:py-16 text-center overflow-hidden"
-      style={{ backgroundImage: "url('/Images/hero-bg.png')" }}
+      style={{ backgroundImage: "url('/Images/hero-bg.webp')" }}
     >
       {/* Content */}
       <div className="relative z-10 w-full max-w-6xl mx-auto hero-content">
@@ -147,7 +149,9 @@ const HeroSection = () => {
       
 
            <div className="py-6 md:py-12 ">
-             <PaymentLogs />
+             <Suspense fallback={null}>
+               <PaymentLogs />
+             </Suspense>
            </div>
 
 

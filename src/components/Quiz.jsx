@@ -62,7 +62,7 @@ const businessStructureRules = [
       scale: "High",
       revenue: ">40L",
     },
-    recommendation: "Private Limited Company",
+    recommendation: "Private Limited",
     reason: "Best for investment, scale, and limited liability",
   },
   {
@@ -73,7 +73,7 @@ const businessStructureRules = [
       scale: "Medium",
       revenue: "<40L",
     },
-    recommendation: "One Person Company (OPC)",
+    recommendation: "Solo Entrepreneur",
     reason: "Ideal for solo entrepreneur with some protection",
   },
   {
@@ -95,7 +95,7 @@ const businessStructureRules = [
       scale: "Medium",
       revenue: "<40L",
     },
-    recommendation: "LLP",
+    recommendation: "Limited Liability Partnership",
     reason: "Safer for partnership with liability protection",
   },
   {
@@ -106,7 +106,7 @@ const businessStructureRules = [
       scale: "Low",
       revenue: "<40L",
     },
-    recommendation: "Partnership Firm",
+    recommendation: "Partnership",
     reason: "Traditional partnership setup (partners bear liability)",
   },
   {
@@ -128,8 +128,8 @@ const businessStructureRules = [
       scale: "High",
       revenue: ">40L",
     },
-    recommendation: "LLP or Private Ltd",
-    reason: "LLP okay for partnerships; Private Ltd better for larger scale",
+    recommendation: "Limited Liability Partnership or Private Ltd",
+    reason: "Limited Liability Partnership okay for partnerships; Private Ltd better for larger scale",
   },
   {
     conditions: {
@@ -139,7 +139,7 @@ const businessStructureRules = [
       scale: "High",
       revenue: ">40L",
     },
-    recommendation: "Private Ltd",
+    recommendation: "Private Limited",
     reason: "Better liability protection and credibility for high scale",
   },
   {
@@ -150,7 +150,7 @@ const businessStructureRules = [
       scale: "High",
       revenue: ">40L",
     },
-    recommendation: "Private Ltd",
+    recommendation: "Private Limited",
     reason: "Investors typically require a corporate structure",
   },
   {
@@ -161,7 +161,7 @@ const businessStructureRules = [
       scale: "High",
       revenue: ">40L",
     },
-    recommendation: "Private Ltd",
+    recommendation: "Private Limited",
     reason: "OPC not suitable for external investors; Private Ltd preferred",
   },
 ];
@@ -223,10 +223,10 @@ const Quiz = ({ onComplete = () => {} }) => {
       else if (processedAnswers.ownership === "Yes") {
         matchedRule = {
           recommendation:
-            processedAnswers.liability === "Yes" ? "LLP" : "Partnership Firm",
+            processedAnswers.liability === "Yes" ? "Limited Liability Partnership" : "Partnership Firm",
           reason:
             processedAnswers.liability === "Yes"
-              ? "Partnership with limited liability (LLP) is recommended"
+              ? "Partnership with limited liability (Limited Liability Partnership) is recommended"
               : "Traditional partnership — partners share unlimited liability",
         };
       }
@@ -264,19 +264,20 @@ const Quiz = ({ onComplete = () => {} }) => {
         setCurrentQuestion((q) => q + 1);
       } else {
         // Finalize and compute recommendation
-        const result = processAnswers(newAnswers);
+        let result = processAnswers(newAnswers);
+        // Fallback if recommendation is empty or missing
+        if (!result || !result.recommendation || result.recommendation.trim() === "") {
+          result = {
+            recommendation: "Sole Proprietorship",
+            reason: "Default: Simplest setup; limited liability protection."
+          };
+        }
         setRecommendation(result);
         setFinished(true);
         onComplete({ answers: newAnswers, recommendation: result });
         // After a short delay, navigate back and pass the recommendation
         setTimeout(() => {
-          // Support both /choosebusinesstype and /startbusiness/choose
-          const currentPath = window.location.pathname;
-          if (currentPath.includes("startbusiness")) {
-            navigate("/startbusiness/choose", { state: { suggested: result.recommendation } });
-          } else {
-            navigate("/startbusiness/choose", { state: { suggested: result.recommendation } });
-          }
+          navigate("/startbusiness/choose", { state: { suggested: result.recommendation } });
         }, 2000);
       }
     }, 600);
@@ -333,7 +334,7 @@ const Quiz = ({ onComplete = () => {} }) => {
     if (!businessType) return <TrendingUp className="w-12 h-12 text-yellow-500" />;
     if (businessType.includes("Private Limited") || businessType.includes("Private Ltd"))
       return <Building className="w-12 h-12 text-blue-500" />;
-    if (businessType.includes("LLP")) return <Users className="w-12 h-12 text-green-500" />;
+    if (businessType.includes("Limited Liability Partnership")) return <Users className="w-12 h-12 text-green-500" />;
     if (businessType.includes("OPC")) return <Shield className="w-12 h-12 text-purple-500" />;
     if (businessType.includes("Partnership")) return <Users className="w-12 h-12 text-orange-500" />;
     return <TrendingUp className="w-12 h-12 text-yellow-500" />;
@@ -491,16 +492,11 @@ const Quiz = ({ onComplete = () => {} }) => {
             className="flex flex-col items-center space-y-4"
           >
             {getBusinessIcon(recommendation.recommendation)}
-            <h2 className="text-4xl font-extrabold text-gray-900">We Suggest You This!</h2>
-            <p className="text-gray-600 text-lg max-w-lg">Based on your inputs, here’s the most suitable business structure for you:</p>
-          </motion.div>
-
-          <motion.div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-8 rounded-2xl border border-blue-200 shadow-lg w-full" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }}>
-            <div className="flex items-center justify-between">
-              <h3 className="text-3xl font-bold text-blue-900 mb-2">{recommendation.recommendation}</h3>
-              <span className="inline-block bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold">Recommended</span>
-            </div>
-            <p className="text-blue-700 font-medium text-lg">{recommendation.reason}</p>
+            <h2 className="text-4xl font-extrabold text-gray-900">Our Suggestion</h2>
+            <p className="text-gray-600 text-lg max-w-lg">Based on your answers, this is the most suitable business structure for you:</p>
+            <h3 className="text-3xl font-bold text-blue-900 mb-2 mt-4">{recommendation.recommendation}</h3>
+            <span className="inline-block bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold">Recommended</span>
+            <p className="text-blue-700 font-medium text-lg mt-2">{recommendation.reason}</p>
           </motion.div>
 
           <motion.div className="bg-gray-50 p-6 rounded-xl text-base text-gray-600 w-full" initial={{ y: 18, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.45 }}>

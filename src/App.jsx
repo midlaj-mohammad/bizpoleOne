@@ -6,6 +6,7 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 
 import Home from "./pages/Home";
+import ProtectedRoute from "./components/ProtectedRoute";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import StartYourBusiness from "./components/StartYourBusiness";
@@ -36,6 +37,12 @@ import BizpoleOneTasks from "./pages/BizpoleOneTasks";
 import BusinessQuiz from "./components/Quastions";
 import BusinessQuizWizard from "./components/Quastions";
 import ExisitingCompanies from "./pages/ExisitingCompanies";
+import CustomerFiles from "./pages/CustomerFiles";
+import CompanyDetails from "./pages/CompanyDetails";
+import Services from "./pages/Services";
+import ProductList from "./pages/ProductView/ProductList";
+import { getSecureItem, setSecureItem } from "./utils/secureStorage";
+import Plansandpricing from "./pages/Plansandpricing";
 
 function App() {
   const location = useLocation();
@@ -58,6 +65,18 @@ function App() {
     "/dashboard", // includes /dashboard and its children
   ];
 
+useEffect(() => {
+  const user = getSecureItem("user");
+  if (typeof user === "string") {
+    try {
+      const parsed = JSON.parse(user);
+      setSecureItem("user", parsed); // re-store correctly
+    } catch {
+      console.warn("Old user format found, clearing...");
+      localStorage.removeItem("user");
+    }
+  }
+}, []);
   const hideLayout = hideLayoutPaths.some((path) =>
     location.pathname.startsWith(path)
   );
@@ -66,7 +85,7 @@ function App() {
     <div className="flex flex-col min-h-screen">
       {!hideLayout && <Navbar />}
 
-      <main className="flex-grow">
+      <main className="flex-grow ">
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<Home />} />
@@ -74,36 +93,46 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/startbusiness/*" element={<StartYourBusiness />} />
           <Route path="/checking" element={<BusinessPanel />} />
-    
+          <Route path="/services" element={<Services />} />
+          <Route path="/products" element={<ProductList />} />
+
           <Route path="/startbusiness/about" element={<Tellabout />} />
           <Route path="/startbusiness/subscriptions" element={<Subscription />} />
           <Route path="/payments" element={<Payment />} />
           <Route path="/quiz" element={<Quiz />} />
           <Route path="/questions" element={<BusinessQuizWizard />} />
-       <Route path="/profile" element={<ProfileLayout />}>
-  <Route index element={<ProfilePage />} /> 
- <Route path="calendar" element={<CalenderPage />} />
-    <Route path="documents" element={<ProfileDocuments />} />
-  <Route path="moderncalendar" element={<ModernCalendar />} />
-    <Route path="events" element={<ProfileEvents />} />
-</Route>
-      <Route path="/existing-companies" element={<ExisitingCompanies />} />
-          {/* Main Dashboard (Nested Routes) */}
-          <Route path="/dashboard" element={<DashboardLayout />}>
-            <Route index element={<DashboardMain />} /> {/* default */}
-            <Route path="books" element={<BizpoleBooks />} />
 
-            {/* BizpoleOne Nested Dashboard */}
-            <Route path="bizpoleone" element={<BizpoleOneDashboardLayout />}>
-              <Route index element={<BizpoleOne />} /> {/* default inside bizpoleone */}
-              <Route path="package" element={<BizpoleOneOverview />} />
-              <Route path="services" element={<BizpoleOneServices />} />
-              <Route path="orders" element={<BizpoleOneServices />} />
-              <Route path="tasks" element={<BizpoleOneTasks/>} />
-              <Route path="pricing" element={<BizpoleOneServices />} />
-              <Route path="individual" element={<BizpoleOneServices />} />
+          <Route path="/profile" element={<ProfileLayout />}>
+            <Route index element={<ProfilePage />} />
+            <Route path="calendar" element={<CalenderPage />} />
+            <Route path="documents" element={<ProfileDocuments />} />
+            <Route path="moderncalendar" element={<ModernCalendar />} />
+            <Route path="events" element={<ProfileEvents />} />
+            <Route path="files" element={<CustomerFiles />} />
+                        <Route path="companydetails" element={<CompanyDetails />} />
+
+          </Route>
+
+
+
+          <Route path="/existing-companies" element={<ExisitingCompanies />} />
+          {/* Main Dashboard (Nested Routes) - Protected */}
+          <Route element={<ProtectedRoute redirectPath="/" />}>
+            <Route path="/dashboard" element={<DashboardLayout />}>
+              <Route index element={<DashboardMain />} /> {/* default */}
+              <Route path="books" element={<BizpoleBooks />} />
+
+              {/* BizpoleOne Nested Dashboard */}
+              <Route path="bizpoleone" element={<BizpoleOneDashboardLayout />}>
+                <Route index element={<BizpoleOne />} /> {/* default inside bizpoleone */}
+                <Route path="package" element={<BizpoleOneOverview />} />
+                <Route path="services" element={<BizpoleOneServices />} />
+                <Route path="orders" element={<BizpoleOneServices />} />
+                <Route path="tasks" element={<BizpoleOneTasks />} />
+                <Route path="pricing" element={<Plansandpricing />} />
+                <Route path="individual" element={<BizpoleOneServices />} />
+              </Route>
             </Route>
-
           </Route>
         </Routes>
       </main>

@@ -1,18 +1,19 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaBars, FaTimes } from "react-icons/fa";
-import SigninModal from "./Modals/SigninModal";
+import { FaBars, FaTimes,FaArrowRight } from "react-icons/fa";
 
+import SigninModal from "./Modals/SigninModal";
 export default function Navbar() {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showSignin, setShowSignin] = useState(false);
+  const [hasToken, setHasToken] = useState(false);
 
   const navItems = [
     { label: "Services", path: "/services" },
-    { label: "Product", path: "/product" },
+    { label: "Product", path: "/products" },
     { label: "Bizpole One", path: "/bizpoleone" },
     { label: "Partners", path: "/partners" },
     { label: "Companies", path: "/companies" },
@@ -27,6 +28,12 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Check for token in localStorage
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setHasToken(!!token);
+  }, []);
+
   const handleNavigate = (path) => {
     navigate(path);
     setMobileMenuOpen(false);
@@ -35,7 +42,7 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
+        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 border-b border-gray-200 ${
           isScrolled ? "bg-white shadow-md" : "bg-transparent"
         }`}
       >
@@ -46,7 +53,7 @@ export default function Navbar() {
             className="cursor-pointer flex items-center"
           >
             <img
-              src="/Images/logo.png"
+              src="/Images/logo.webp"
               alt="Bizpole Logo"
               className="h-12 md:h-14 lg:h-16"
             />
@@ -72,49 +79,70 @@ export default function Navbar() {
 
           {/* Right Side Buttons */}
           <div className="hidden md:flex items-center gap-3 lg:gap-4 xl:gap-6">
-            {/* Sign In Button */}
-            <motion.button
-              whileHover="hover"
-              initial="rest"
-              animate="rest"
-              onClick={() => setShowSignin(true)}
-              className="relative overflow-hidden px-3 md:px-4 lg:px-5 py-2 text-xs md:text-sm lg:text-base font-medium rounded-full cursor-pointer bg-[#fbbf24] text-black"
-            >
-              <motion.span
-                variants={{
-                  rest: { width: "0%", opacity: 0 },
-                  hover: { width: "100%", opacity: 1 },
-                }}
-                transition={{ duration: 0.4, ease: "easeInOut" }}
-                className={`absolute left-1/2 top-0 h-full ${
-                  isScrolled ? "bg-white" : "bg-[#fbbf24]"
-                } -translate-x-1/2`}
-              />
-              <span className="relative z-10 text-sm md:text-base lg:text-lg navitems">
-                Sign In 
-              </span>
-            </motion.button>
+            {hasToken ? (
+              // ✅ If token found → show Go to Dashboard only
+              <motion.button
+                whileHover="hover"
+                initial="rest"
+                animate="rest"
+                onClick={() => navigate("/dashboard/bizpoleone")}
+                className="relative overflow-hidden px-4 lg:px-6 py-2 text-sm lg:text-base font-medium rounded-full cursor-pointer bg-[#F3C625] text-white shadow-md"
+              >
+                <motion.span
+                  variants={{
+                    rest: { width: "0%", opacity: 0 },
+                    hover: { width: "100%", opacity: 1 },
+                  }}
+                  transition={{ duration: 0.4, ease: "easeInOut" }}
+                  className="absolute left-1/2 top-0 h-full bg-[#000] -translate-x-1/2"
+                />
+                <span className="relative z-10">Go to Dashboard </span>
+              </motion.button>
+            ) : (
+              <>
+                {/* Sign In Button */}
+                <motion.button
+                  whileHover="hover"
+                  initial="rest"
+                  animate="rest"
+                  onClick={() => setShowSignin(true)}
+                  className="relative overflow-hidden px-4 lg:px-6 py-2 text-sm lg:text-base font-medium rounded-full cursor-pointer bg-[#fbbf24] text-black"
+                >
+                  <motion.span
+                    variants={{
+                      rest: { width: "0%", opacity: 0 },
+                      hover: { width: "100%", opacity: 1 },
+                    }}
+                    transition={{ duration: 0.4, ease: "easeInOut" }}
+                    className={`absolute left-1/2 top-0 h-full ${
+                      isScrolled ? "bg-white" : "bg-[#fbbf24]"
+                    } -translate-x-1/2`}
+                  />
+                  <span className="relative z-10">Sign In</span>
+                </motion.button>
 
-            {/* Get Start Your Business Button */}
-            <motion.button
-              whileHover="hover"
-              initial="rest"
-              animate="rest"
-              onClick={() => navigate("/startbusiness")}
-              className="relative overflow-hidden px-3 md:px-4 lg:px-5 py-2 text-xs md:text-sm lg:text-base font-semibold rounded-full text-black cursor-pointer bg-white shadow-md"
-            >
-              <motion.span
-                variants={{
-                  rest: { width: "0%", opacity: 0 },
-                  hover: { width: "100%", opacity: 1 },
-                }}
-                transition={{ duration: 0.4, ease: "easeInOut" }}
-                className="absolute left-1/2 top-0 h-full bg-[#fbbf24] -translate-x-1/2"
-              />
-              <span className="relative z-10 text-sm md:text-base lg:text-lg navitems">
-                Get Start Your <span className="font-bold">Business</span>
-              </span>
-            </motion.button>
+                {/* ❌ Hidden when token exists */}
+                <motion.button
+                  whileHover="hover"
+                  initial="rest"
+                  animate="rest"
+                  onClick={() => navigate("/startbusiness")}
+                  className="relative overflow-hidden px-4 lg:px-6 py-2 text-sm lg:text-base font-semibold rounded-full text-black cursor-pointer bg-white shadow-md"
+                >
+                  <motion.span
+                    variants={{
+                      rest: { width: "0%", opacity: 0 },
+                      hover: { width: "100%", opacity: 1 },
+                    }}
+                    transition={{ duration: 0.4, ease: "easeInOut" }}
+                    className="absolute left-1/2 top-0 h-full bg-[#fbbf24] -translate-x-1/2"
+                  />
+                  <span className="relative z-10">
+                    Get Start Your <span className="font-bold">Business</span>
+                  </span>
+                </motion.button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -150,51 +178,50 @@ export default function Navbar() {
                   </li>
                 ))}
 
-                {/* Sign In Button Mobile */}
+                {/* Mobile Conditional Buttons */}
                 <li>
-                  <motion.button
-                    whileHover="hover"
-                    initial="rest"
-                    animate="rest"
-                    onClick={() => setShowSignin(true)}
-                    className="relative overflow-hidden w-full py-2 rounded-full bg-white text-black font-medium"
-                  >
-                    <motion.span
-                      variants={{
-                        rest: { width: "0%", opacity: 0 },
-                        hover: { width: "100%", opacity: 1 },
+                  {hasToken ? (
+                    <motion.button
+                      whileHover="hover"
+                      initial="rest"
+                      animate="rest"
+                      onClick={() => {
+                        navigate("/dashboard");
+                        setMobileMenuOpen(false);
                       }}
-                      transition={{ duration: 0.4, ease: "easeInOut" }}
-                      className="absolute left-1/2 top-0 h-full bg-[#F3C625] -translate-x-1/2"
-                    />
-                    <span className="relative z-10">Sign In</span>
-                  </motion.button>
-                </li>
-
-                {/* Get Start Your Business Button Mobile */}
-                <li>
-                  <motion.button
-                    whileHover="hover"
-                    initial="rest"
-                    animate="rest"
-                    onClick={() => {
-                      navigate("/startbusiness");
-                      setMobileMenuOpen(false);
-                    }}
-                    className="relative overflow-hidden w-full py-2 rounded-full font-semibold text-black bg-white border border-black"
-                  >
-                    <motion.span
-                      variants={{
-                        rest: { width: "0%", opacity: 0 },
-                        hover: { width: "100%", opacity: 1 },
-                      }}
-                      transition={{ duration: 0.4, ease: "easeInOut" }}
-                      className="absolute left-1/2 top-0 h-full bg-[#fbbf24] -translate-x-1/2 "
-                    />
-                    <span className="relative z-10">
-                      Get Start Your <span className="font-bold">Business</span>
-                    </span>
-                  </motion.button>
+                      className="relative overflow-hidden w-full py-2 rounded-full bg-[#F3C625] text-white font-medium"
+                    >
+                      <motion.span
+                        variants={{
+                          rest: { width: "0%", opacity: 0 },
+                          hover: { width: "100%", opacity: 1 },
+                        }}
+                        transition={{ duration: 0.4, ease: "easeInOut" }}
+                        className="absolute left-1/2 top-0 h-full bg-[#F3C625] text-black -translate-x-1/2"
+                      />
+                      <span className="relative z-10">Go to Dashboard </span>
+                    </motion.button>
+                  ) : (
+                    <>
+                      <motion.button
+                        whileHover="hover"
+                        initial="rest"
+                        animate="rest"
+                        onClick={() => setShowSignin(true)}
+                        className="relative overflow-hidden w-full py-2 rounded-full bg-[#fbbf24] text-black font-medium"
+                      >
+                        <motion.span
+                          variants={{
+                            rest: { width: "0%", opacity: 0 },
+                            hover: { width: "100%", opacity: 1 },
+                          }}
+                          transition={{ duration: 0.4, ease: "easeInOut" }}
+                          className="absolute left-1/2 top-0 h-full bg-[#facc15] -translate-x-1/2"
+                        />
+                        <span className="relative z-10">Sign In</span>
+                      </motion.button>
+                    </>
+                  )}
                 </li>
               </ul>
             </motion.div>

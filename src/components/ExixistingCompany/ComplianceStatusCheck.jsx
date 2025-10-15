@@ -1,32 +1,58 @@
+
 import React, { useState } from "react";
-import SpeechRecognition, {
-  useSpeechRecognition,
-} from "react-speech-recognition";
+import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
+import { upsertCompany } from "../../api/CompanyApi";
+
 
 const ComplianceStatusCheck = ({ onNext, onPrev }) => {
   // Speech recognition hook
-  const { transcript, listening, resetTranscript, browserSupportsSpeechRecognition } =
-    useSpeechRecognition();
+  const { transcript, listening, resetTranscript, browserSupportsSpeechRecognition } = useSpeechRecognition();
 
-  // Manage transcripts for each textarea separately
-  const [businessText, setBusinessText] = useState("");
-  const [expectationText, setExpectationText] = useState("");
+  // Controlled state for all fields
+  const [form, setForm] = useState({
+    gstReturns: "",
+    gstReturnsYear: "",
+    rocFiling: "",
+    booksOfAccounts: "",
+    itReturn: "",
+    auditor: "",
+    businessText: "",
+    expectationText: "",
+  });
   const [activeField, setActiveField] = useState(null); // "business" | "expectation"
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
   const handleMicClick = (field) => {
     setActiveField(field);
-    resetTranscript(); // clear old transcript
+    resetTranscript();
     SpeechRecognition.startListening({ continuous: true, language: "en-IN" });
   };
-
   const handleStop = () => {
     SpeechRecognition.stopListening();
     if (activeField === "business") {
-      setBusinessText((prev) => prev + " " + transcript);
+      setForm((prev) => ({ ...prev, businessText: prev.businessText + " " + transcript }));
     } else if (activeField === "expectation") {
-      setExpectationText((prev) => prev + " " + transcript);
+      setForm((prev) => ({ ...prev, expectationText: prev.expectationText + " " + transcript }));
     }
     setActiveField(null);
+  };
+
+  const handleFinish = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    try {
+      await upsertCompany(form);
+      if (onNext) onNext();
+    } catch (err) {
+      setError("Failed to save compliance information.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!browserSupportsSpeechRecognition) {
@@ -50,12 +76,27 @@ const ComplianceStatusCheck = ({ onNext, onPrev }) => {
               <label className="block mb-2 text-lg font-semibold">
                 ARE GST RETURNS UP TO DATE?
               </label>
-              <select className="w-full border-2 border-yellow-400 rounded-full px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+              <select
+                name="gstReturns"
+                value={form.gstReturns}
+                onChange={handleChange}
+                className="w-full border-2 border-yellow-400 rounded-full px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              >
                 <option value="">Yes/No/NA (if Yes, input field opens)</option>
                 <option value="yes">Yes</option>
                 <option value="no">No</option>
                 <option value="na">NA</option>
               </select>
+              {form.gstReturns === "yes" && (
+                <input
+                  type="text"
+                  name="gstReturnsYear"
+                  value={form.gstReturnsYear}
+                  onChange={handleChange}
+                  placeholder="Financial year of last GST return"
+                  className="w-full border-2 border-yellow-400 rounded-full px-4 py-3 mt-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                />
+              )}
             </div>
 
             {/* ROC Filing */}
@@ -65,6 +106,9 @@ const ComplianceStatusCheck = ({ onNext, onPrev }) => {
               </label>
               <input
                 type="text"
+                name="rocFiling"
+                value={form.rocFiling}
+                onChange={handleChange}
                 placeholder="Financial year of last ROC return"
                 className="w-full border-2 border-yellow-400 rounded-full px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-500"
               />
@@ -75,7 +119,12 @@ const ComplianceStatusCheck = ({ onNext, onPrev }) => {
               <label className="block mb-2 text-lg font-semibold">
                 BOOKS OF ACCOUNTS UP TO DATE?
               </label>
-              <select className="w-full border-2 border-yellow-400 rounded-full px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+              <select
+                name="booksOfAccounts"
+                value={form.booksOfAccounts}
+                onChange={handleChange}
+                className="w-full border-2 border-yellow-400 rounded-full px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              >
                 <option value="">Yes/No/NA</option>
                 <option value="yes">Yes</option>
                 <option value="no">No</option>
@@ -93,6 +142,9 @@ const ComplianceStatusCheck = ({ onNext, onPrev }) => {
               </label>
               <input
                 type="text"
+                name="itReturn"
+                value={form.itReturn}
+                onChange={handleChange}
                 placeholder="Financial year of last IT return"
                 className="w-full border-2 border-yellow-400 rounded-full px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-500"
               />
@@ -103,7 +155,12 @@ const ComplianceStatusCheck = ({ onNext, onPrev }) => {
               <label className="block mb-2 text-lg font-semibold">
                 DO YOU HAVE AN AUDITOR?
               </label>
-              <select className="w-full border-2 border-yellow-400 rounded-full px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+              <select
+                name="auditor"
+                value={form.auditor}
+                onChange={handleChange}
+                className="w-full border-2 border-yellow-400 rounded-full px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              >
                 <option value="">Yes/No/NA</option>
                 <option value="yes">Yes</option>
                 <option value="no">No</option>
@@ -125,8 +182,9 @@ const ComplianceStatusCheck = ({ onNext, onPrev }) => {
               <div className="relative">
                 <textarea
                   rows={4}
-                  value={businessText}
-                  onChange={(e) => setBusinessText(e.target.value)}
+                  name="businessText"
+                  value={form.businessText}
+                  onChange={handleChange}
                   placeholder="Audio to Text"
                   className="w-full border-2 border-yellow-400 rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-500"
                 ></textarea>
@@ -161,8 +219,9 @@ const ComplianceStatusCheck = ({ onNext, onPrev }) => {
               <div className="relative">
                 <textarea
                   rows={4}
-                  value={expectationText}
-                  onChange={(e) => setExpectationText(e.target.value)}
+                  name="expectationText"
+                  value={form.expectationText}
+                  onChange={handleChange}
                   placeholder="Audio to Text"
                   className="w-full border-2 border-yellow-400 rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-500"
                 ></textarea>
@@ -216,11 +275,13 @@ const ComplianceStatusCheck = ({ onNext, onPrev }) => {
             </label>
             <button
               className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-8 py-3 rounded-full flex items-center gap-2 transition focus:outline-none focus:ring-2 focus:ring-yellow-500"
-              onClick={onNext}
-              title="Next"
+              onClick={handleFinish}
+              title="Finish"
+              disabled={loading}
             >
-              Finish
+              {loading ? "Saving..." : "Finish"}
             </button>
+            {error && <div className="text-red-500 text-center mt-4">{error}</div>}
           </div>
         </div>
       </div>
