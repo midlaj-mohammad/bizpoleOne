@@ -1,10 +1,10 @@
-
 import React, { useState } from "react";
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
-import { upsertCompany } from "../../api/CompanyApi";
-
+import { upsertRegistrationStatus } from "../../api/CompanyApi";
+import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
 
 const ComplianceStatusCheck = ({ onNext, onPrev }) => {
+  const navigate = useNavigate(); // Initialize navigate function
   // Speech recognition hook
   const { transcript, listening, resetTranscript, browserSupportsSpeechRecognition } = useSpeechRecognition();
 
@@ -19,44 +19,84 @@ const ComplianceStatusCheck = ({ onNext, onPrev }) => {
     businessText: "",
     expectationText: "",
   });
-  const [activeField, setActiveField] = useState(null); // "business" | "expectation"
+  const [activeField, setActiveField] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
+
   const handleMicClick = (field) => {
     setActiveField(field);
     resetTranscript();
     SpeechRecognition.startListening({ continuous: true, language: "en-IN" });
   };
+
   const handleStop = () => {
     SpeechRecognition.stopListening();
     if (activeField === "business") {
-      setForm((prev) => ({ ...prev, businessText: prev.businessText + " " + transcript }));
+      setForm((prev) => ({ 
+        ...prev, 
+        businessText: prev.businessText + (prev.businessText ? " " : "") + transcript 
+      }));
     } else if (activeField === "expectation") {
-      setForm((prev) => ({ ...prev, expectationText: prev.expectationText + " " + transcript }));
+      setForm((prev) => ({ 
+        ...prev, 
+        expectationText: prev.expectationText + (prev.expectationText ? " " : "") + transcript 
+      }));
     }
     setActiveField(null);
   };
 
   const handleFinish = async (e) => {
     e.preventDefault();
+    
+    // Basic validation
+    if (!form.gstReturns || !form.booksOfAccounts || !form.auditor) {
+      setError("Please fill in all required compliance fields.");
+      return;
+    }
+
     setLoading(true);
     setError("");
     try {
-      await upsertCompany(form);
-      if (onNext) onNext();
+      // Prepare compliance data for API
+      const registrationStatusData = {
+        gstReturns: form.gstReturns,
+        gstReturnsYear: form.gstReturnsYear,
+        rocFiling: form.rocFiling,
+        booksOfAccounts: form.booksOfAccounts,
+        itReturn: form.itReturn,
+        auditor: form.auditor,
+        businessUnderstanding: form.businessText,
+        expectations: form.expectationText
+      };
+
+      console.log("📤 Sending registration status data:", registrationStatusData);
+
+      // Call the correct API function
+      const response = await upsertRegistrationStatus(registrationStatusData);
+      console.log("✅ Registration status saved successfully:", response);
+
+      // ✅ Navigate to dashboard after successful submission
+      navigate("/", { state: { openSigninModal: true } });
+ // Change this to your actual dashboard route
+      
     } catch (err) {
-      setError("Failed to save compliance information.");
+      console.error("❌ Error saving registration status:", err);
+      setError(err.response?.data?.message || "Failed to save compliance information. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   if (!browserSupportsSpeechRecognition) {
-    return <p>Your browser does not support Speech Recognition.</p>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-red-500 text-lg">Your browser does not support Speech Recognition.</p>
+      </div>
+    );
   }
 
   return (
@@ -68,7 +108,7 @@ const ComplianceStatusCheck = ({ onNext, onPrev }) => {
         </h1>
 
         {/* Form Grid */}
-  <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
           {/* Left Column */}
           <div className="space-y-8">
             {/* GST Returns */}
@@ -81,8 +121,9 @@ const ComplianceStatusCheck = ({ onNext, onPrev }) => {
                 value={form.gstReturns}
                 onChange={handleChange}
                 className="w-full border-2 border-yellow-400 rounded-full px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                required
               >
-                <option value="">Yes/No/NA (if Yes, input field opens)</option>
+                <option value="">Select</option>
                 <option value="yes">Yes</option>
                 <option value="no">No</option>
                 <option value="na">NA</option>
@@ -124,8 +165,9 @@ const ComplianceStatusCheck = ({ onNext, onPrev }) => {
                 value={form.booksOfAccounts}
                 onChange={handleChange}
                 className="w-full border-2 border-yellow-400 rounded-full px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                required
               >
-                <option value="">Yes/No/NA</option>
+                <option value="">Select</option>
                 <option value="yes">Yes</option>
                 <option value="no">No</option>
                 <option value="na">NA</option>
@@ -160,8 +202,9 @@ const ComplianceStatusCheck = ({ onNext, onPrev }) => {
                 value={form.auditor}
                 onChange={handleChange}
                 className="w-full border-2 border-yellow-400 rounded-full px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                required
               >
-                <option value="">Yes/No/NA</option>
+                <option value="">Select</option>
                 <option value="yes">Yes</option>
                 <option value="no">No</option>
                 <option value="na">NA</option>
@@ -171,7 +214,7 @@ const ComplianceStatusCheck = ({ onNext, onPrev }) => {
         </div>
 
         {/* Business Understanding */}
-  <div className="max-w-5xl mx-auto mt-8 md:mt-12">
+        <div className="max-w-5xl mx-auto mt-8 md:mt-12">
           <h2 className="text-xl font-bold mb-8">Business Understanding</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
             {/* Tell Us More */}
@@ -209,6 +252,9 @@ const ComplianceStatusCheck = ({ onNext, onPrev }) => {
                   🎤
                 </button>
               </div>
+              {listening && activeField === "business" && (
+                <p className="text-sm text-green-600 mt-2">Listening... {transcript}</p>
+              )}
             </div>
 
             {/* Expectation */}
@@ -246,16 +292,20 @@ const ComplianceStatusCheck = ({ onNext, onPrev }) => {
                   🎤
                 </button>
               </div>
+              {listening && activeField === "expectation" && (
+                <p className="text-sm text-green-600 mt-2">Listening... {transcript}</p>
+              )}
             </div>
           </div>
         </div>
 
         {/* Bottom Buttons */}
-  <div className="flex flex-col md:flex-row items-center justify-between mt-8 md:mt-12 max-w-5xl mx-auto gap-6 md:gap-0">
+        <div className="flex flex-col md:flex-row items-center justify-between mt-8 md:mt-12 max-w-5xl mx-auto gap-6 md:gap-0">
           <button
             onClick={onPrev}
             className="w-12 h-12 flex items-center justify-center border-2 border-yellow-400 rounded-full text-yellow-500 text-xl hover:bg-yellow-100 transition focus:outline-none focus:ring-2 focus:ring-yellow-500"
             title="Back"
+            disabled={loading}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -274,25 +324,36 @@ const ComplianceStatusCheck = ({ onNext, onPrev }) => {
               Remind me later!
             </label>
             <button
-              className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-8 py-3 rounded-full flex items-center gap-2 transition focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-8 py-3 rounded-full flex items-center gap-2 transition focus:outline-none focus:ring-2 focus:ring-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={handleFinish}
               title="Finish"
               disabled={loading}
             >
-              {loading ? "Saving..." : "Finish"}
+              {loading ? (
+                <>
+                  <span className="animate-spin inline-block w-4 h-4 border-2 border-black border-t-transparent rounded-full"></span>
+                  Saving...
+                </>
+              ) : (
+                "Finish & Go to Dashboard"
+              )}
             </button>
-            {error && <div className="text-red-500 text-center mt-4">{error}</div>}
           </div>
         </div>
+        {error && (
+          <div className="text-red-500 text-center mt-4 p-3 bg-red-50 rounded-xl max-w-5xl mx-auto">
+            {error}
+          </div>
+        )}
       </div>
 
       {/* Right Sidebar Timeline Stepper */}
-  <div className="w-full lg:w-100 bg-yellow-400 text-black p-4 sm:p-8 rounded-tr-2xl rounded-br-2xl pt-10 lg:pt-60 flex flex-col items-center mt-8 lg:mt-0">
+      <div className="w-full lg:w-100 bg-yellow-400 text-black p-4 sm:p-8 rounded-tr-2xl rounded-br-2xl pt-10 lg:pt-60 flex flex-col items-center mt-8 lg:mt-0">
         <h2 className="font-bold text-xl mb-10 text-white">Quick & Easy Setup</h2>
         <ol className="relative border-l-2 border-black/30 ml-4">
           {/* Step 1 */}
           <li className="mb-10 ml-6 flex flex-col">
-            <span className="absolute -left-4 flex items-center justify-center w-8 h-8 bg-black text-yellow-400 rounded-full font-bold text-lg border-4 border-yellow-400">
+            <span className="absolute -left-4 flex items-center justify-center w-8 h-8 bg-black text-white rounded-full font-bold text-lg border-4 border-black">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-6 w-6"
@@ -309,7 +370,7 @@ const ComplianceStatusCheck = ({ onNext, onPrev }) => {
           </li>
           {/* Step 2 */}
           <li className="mb-10 ml-6 flex flex-col">
-            <span className="absolute -left-4 flex items-center justify-center w-8 h-8 bg-black text-yellow-400 rounded-full font-bold text-lg border-4 border-yellow-400">
+            <span className="absolute -left-4 flex items-center justify-center w-8 h-8 bg-black text-white rounded-full font-bold text-lg border-4 border-black">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-6 w-6"
@@ -326,7 +387,7 @@ const ComplianceStatusCheck = ({ onNext, onPrev }) => {
           </li>
           {/* Step 3 */}
           <li className="mb-10 ml-6 flex flex-col">
-            <span className="absolute -left-4 flex items-center justify-center w-8 h-8 bg-black text-yellow-400 rounded-full font-bold text-lg border-4 border-yellow-400">
+            <span className="absolute -left-4 flex items-center justify-center w-8 h-8 bg-black text-white rounded-full font-bold text-lg border-4 border-black">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-6 w-6"

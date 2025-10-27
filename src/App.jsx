@@ -43,6 +43,7 @@ import Services from "./pages/Services";
 import ProductList from "./pages/ProductView/ProductList";
 import { getSecureItem, setSecureItem } from "./utils/secureStorage";
 import Plansandpricing from "./pages/Plansandpricing";
+import ServiceDetails from "./pages/ServiceDetails";
 
 function App() {
   const location = useLocation();
@@ -94,6 +95,7 @@ useEffect(() => {
           <Route path="/startbusiness/*" element={<StartYourBusiness />} />
           <Route path="/checking" element={<BusinessPanel />} />
           <Route path="/services" element={<Services />} />
+             <Route path="/services/:id" element={<ServiceDetails />} />
           <Route path="/products" element={<ProductList />} />
 
           <Route path="/startbusiness/about" element={<Tellabout />} />

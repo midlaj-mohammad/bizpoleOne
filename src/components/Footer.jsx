@@ -3,7 +3,7 @@ import { FiPhone, FiMail, FiMapPin } from "react-icons/fi";
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-100 text-gray-800 py-10 mt-6">
+    <footer className="bg-gray-100 text-gray-800 py-10 ">
       <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
         
         {/* Social Links */}

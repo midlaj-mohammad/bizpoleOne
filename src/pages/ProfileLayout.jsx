@@ -16,6 +16,7 @@ import {
   ChevronDown,
   User,
   LogOut,
+  ArrowLeft,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -97,6 +98,11 @@ const ProfileLayout = () => {
     localStorage.removeItem("selectedCompany");
     // or localStorage.clear(); if you want to wipe everything
     navigate("/login");
+  };
+
+  // Handle back to dashboard - MOVED INSIDE THE COMPONENT
+  const handleBackToDashboard = () => {
+    navigate("/dashboard/bizpoleone");
   };
 
   return (
@@ -238,6 +244,18 @@ const ProfileLayout = () => {
 
         {/* Bottom Buttons */}
         <div className="p-6 space-y-4">
+          {/* Back to Dashboard Button */}
+          <button 
+            onClick={handleBackToDashboard}
+            className="flex w-full items-center justify-between rounded-lg bg-amber-500 hover:bg-amber-600 px-4 py-3 text-white font-medium transition duration-200 shadow-md hover:shadow-lg"
+          >
+            <span className="flex items-center gap-2">
+              <ArrowLeft size={16} /> 
+              Back to Dashboard
+            </span>
+
+          </button>
+
           <button className="flex w-full items-center justify-between rounded-lg bg-gray-100 px-4 py-2 text-sm text-gray-600 hover:bg-gray-200">
             <span className="flex items-center gap-2">
               <Send size={16} /> Send Feedback

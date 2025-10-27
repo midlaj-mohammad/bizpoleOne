@@ -1,11 +1,12 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { FaBars, FaTimes,FaArrowRight } from "react-icons/fa";
-
+import { useNavigate, useLocation } from "react-router-dom";
+import { FaBars, FaTimes } from "react-icons/fa";
 import SigninModal from "./Modals/SigninModal";
+
 export default function Navbar() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showSignin, setShowSignin] = useState(false);
@@ -18,6 +19,15 @@ export default function Navbar() {
     { label: "Partners", path: "/partners" },
     { label: "Companies", path: "/companies" },
   ];
+
+  // ✅ Auto-open Signin Modal if redirected from Compliance page
+  useEffect(() => {
+    if (location.state?.openSigninModal) {
+      setShowSignin(true);
+      // Prevent re-trigger on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   // Detect scroll
   useEffect(() => {
@@ -80,7 +90,7 @@ export default function Navbar() {
           {/* Right Side Buttons */}
           <div className="hidden md:flex items-center gap-3 lg:gap-4 xl:gap-6">
             {hasToken ? (
-              // ✅ If token found → show Go to Dashboard only
+              // ✅ If token found → show Go to Dashboard
               <motion.button
                 whileHover="hover"
                 initial="rest"
@@ -96,7 +106,7 @@ export default function Navbar() {
                   transition={{ duration: 0.4, ease: "easeInOut" }}
                   className="absolute left-1/2 top-0 h-full bg-[#000] -translate-x-1/2"
                 />
-                <span className="relative z-10">Go to Dashboard </span>
+                <span className="relative z-10">Go to Dashboard</span>
               </motion.button>
             ) : (
               <>
@@ -121,7 +131,7 @@ export default function Navbar() {
                   <span className="relative z-10">Sign In</span>
                 </motion.button>
 
-                {/* ❌ Hidden when token exists */}
+                {/* Get Start Your Business */}
                 <motion.button
                   whileHover="hover"
                   initial="rest"
@@ -199,28 +209,26 @@ export default function Navbar() {
                         transition={{ duration: 0.4, ease: "easeInOut" }}
                         className="absolute left-1/2 top-0 h-full bg-[#F3C625] text-black -translate-x-1/2"
                       />
-                      <span className="relative z-10">Go to Dashboard </span>
+                      <span className="relative z-10">Go to Dashboard</span>
                     </motion.button>
                   ) : (
-                    <>
-                      <motion.button
-                        whileHover="hover"
-                        initial="rest"
-                        animate="rest"
-                        onClick={() => setShowSignin(true)}
-                        className="relative overflow-hidden w-full py-2 rounded-full bg-[#fbbf24] text-black font-medium"
-                      >
-                        <motion.span
-                          variants={{
-                            rest: { width: "0%", opacity: 0 },
-                            hover: { width: "100%", opacity: 1 },
-                          }}
-                          transition={{ duration: 0.4, ease: "easeInOut" }}
-                          className="absolute left-1/2 top-0 h-full bg-[#facc15] -translate-x-1/2"
-                        />
-                        <span className="relative z-10">Sign In</span>
-                      </motion.button>
-                    </>
+                    <motion.button
+                      whileHover="hover"
+                      initial="rest"
+                      animate="rest"
+                      onClick={() => setShowSignin(true)}
+                      className="relative overflow-hidden w-full py-2 rounded-full bg-[#fbbf24] text-black font-medium"
+                    >
+                      <motion.span
+                        variants={{
+                          rest: { width: "0%", opacity: 0 },
+                          hover: { width: "100%", opacity: 1 },
+                        }}
+                        transition={{ duration: 0.4, ease: "easeInOut" }}
+                        className="absolute left-1/2 top-0 h-full bg-[#facc15] -translate-x-1/2"
+                      />
+                      <span className="relative z-10">Sign In</span>
+                    </motion.button>
                   )}
                 </li>
               </ul>
@@ -229,7 +237,7 @@ export default function Navbar() {
         </AnimatePresence>
       </nav>
 
-      {/* Signin Modal */}
+      {/* ✅ Signin Modal */}
       <SigninModal isOpen={showSignin} onClose={() => setShowSignin(false)} />
     </>
   );

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import ServicesApi from "../api/ServicesApi";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -13,7 +14,9 @@ const Services = () => {
   const [filter, setFilter] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
 
-  // Fetch categories on component mount
+  const navigate = useNavigate();
+
+  // Fetch categories
   useEffect(() => {
     setCategoriesLoading(true);
     ServicesApi.getServiceCategories()
@@ -27,11 +30,10 @@ const Services = () => {
       .finally(() => setCategoriesLoading(false));
   }, []);
 
-  // Fetch services when filters, category, or pagination changes
+  // Fetch services
   useEffect(() => {
     setLoading(true);
     if (selectedCategory) {
-      // Use category-specific endpoint with pagination
       ServicesApi.getServicesByCategory(selectedCategory, { page, limit })
         .then((res) => {
           setServices(res.data || []);
@@ -44,7 +46,6 @@ const Services = () => {
         })
         .finally(() => setLoading(false));
     } else {
-      // Use paginated endpoint for all/filtered services
       ServicesApi.getServices({ page, limit, filter })
         .then((res) => {
           setServices(res.data || []);
@@ -58,15 +59,14 @@ const Services = () => {
     }
   }, [page, limit, filter, selectedCategory]);
 
+  // Navigate to details page
   const handleLearnMore = (serviceId) => {
-    console.log('Learn more:', serviceId);
-    // Navigate to details page
-    // window.location.href = `/services/${serviceId}`;
+    navigate(`/services/${serviceId}`, { state: { serviceId } });
   };
 
   const handleCategoryChange = (categoryId) => {
     setSelectedCategory(categoryId);
-    setPage(1); // Reset to first page when category changes
+    setPage(1);
   };
 
   const clearFilters = () => {
@@ -75,67 +75,47 @@ const Services = () => {
     setPage(1);
   };
 
+  // Animations
   const pageVariants = {
     initial: { opacity: 0, y: 20 },
-    animate: { 
-      opacity: 1, 
+    animate: {
+      opacity: 1,
       y: 0,
-      transition: { duration: 0.5, ease: "easeOut" }
+      transition: { duration: 0.5, ease: "easeOut" },
     },
-    exit: { 
-      opacity: 0, 
-      y: -20,
-      transition: { duration: 0.3 }
-    }
+    exit: { opacity: 0, y: -20, transition: { duration: 0.3 } },
   };
 
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: {
-        staggerChildren: 0.08,
-        delayChildren: 0.1
-      }
-    }
+      transition: { staggerChildren: 0.08, delayChildren: 0.1 },
+    },
   };
 
   const cardVariants = {
-    hidden: { 
-      opacity: 0, 
-      y: 30,
-      scale: 0.95
-    },
-    visible: { 
-      opacity: 1, 
+    hidden: { opacity: 0, y: 30, scale: 0.95 },
+    visible: {
+      opacity: 1,
       y: 0,
       scale: 1,
-      transition: {
-        duration: 0.4,
-        ease: [0.25, 0.46, 0.45, 0.94]
-      }
-    }
+      transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] },
+    },
   };
 
   const iconVariants = {
     initial: { scale: 1, rotate: 0 },
-    hover: { 
-      scale: 1.1, 
-      rotate: 5,
-      transition: { 
-        duration: 0.3,
-        ease: "easeOut"
-      }
-    }
+    hover: { scale: 1.1, rotate: 5, transition: { duration: 0.3 } },
   };
 
-  // Get selected category name for display
-  const selectedCategoryName = selectedCategory 
-    ? categories.find(cat => cat.CategoryID.toString() === selectedCategory)?.CategoryName 
+  const selectedCategoryName = selectedCategory
+    ? categories.find((cat) => cat.CategoryID.toString() === selectedCategory)
+        ?.CategoryName
     : null;
 
   return (
-    <motion.div 
+    <motion.div
       className="min-h-screen mt-32 bg-gradient-to-br from-slate-50 via-white to-slate-100 py-16 px-4 sm:px-6 lg:px-8"
       initial="initial"
       animate="animate"
@@ -167,12 +147,13 @@ const Services = () => {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.4 }}
           >
-            Discover our comprehensive range of professional services tailored to meet your needs
+            Discover our comprehensive range of professional services tailored
+            to meet your needs
           </motion.p>
         </motion.div>
 
         {/* Filter Section */}
-        <motion.div 
+        <motion.div
           className="max-w-4xl mx-auto mb-16"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -185,16 +166,26 @@ const Services = () => {
                 type="text"
                 placeholder="Search services..."
                 value={filter}
-                onChange={e => setFilter(e.target.value)}
+                onChange={(e) => setFilter(e.target.value)}
                 className="w-full px-6 py-4 rounded-2xl border-2 border-gray-200 bg-white shadow-sm focus:ring-2 focus:ring-[#F3C625] focus:border-[#F3C625] transition-all duration-300 outline-none text-gray-700 placeholder-gray-400"
               />
-              <motion.div 
+              <motion.div
                 className="absolute right-4 top-1/2 transform -translate-y-1/2"
                 animate={{ scale: [1, 1.1, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                <svg
+                  className="w-5 h-5 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
                 </svg>
               </motion.div>
             </div>
@@ -203,7 +194,7 @@ const Services = () => {
             <div className="relative group">
               <select
                 value={selectedCategory}
-                onChange={e => handleCategoryChange(e.target.value)}
+                onChange={(e) => handleCategoryChange(e.target.value)}
                 className="w-full px-6 py-4 rounded-2xl border-2 border-gray-200 bg-white shadow-sm focus:ring-2 focus:ring-[#F3C625] focus:border-[#F3C625] transition-all duration-300 outline-none text-gray-700 appearance-none cursor-pointer"
               >
                 <option value="">All Categories</option>
@@ -211,24 +202,37 @@ const Services = () => {
                   <option disabled>Loading categories...</option>
                 ) : (
                   categories.map((category) => (
-                    <option key={category.CategoryID} value={category.CategoryID}>
+                    <option
+                      key={category.CategoryID}
+                      value={category.CategoryID}
+                    >
                       {category.CategoryName}
                     </option>
                   ))
                 )}
               </select>
-              <motion.div 
+              <motion.div
                 className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none"
                 animate={{ y: [0, -2, 0] }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                <svg
+                  className="w-5 h-5 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
                 </svg>
               </motion.div>
             </div>
 
-            {/* Clear Filters Button */}
+            {/* Clear Filters */}
             <motion.button
               onClick={clearFilters}
               className="px-6 py-4 rounded-2xl border-2 border-gray-300 bg-white text-gray-700 font-semibold shadow-sm hover:shadow-md transition-all duration-300 hover:border-[#F3C625] hover:text-[#F3C625] disabled:opacity-50 disabled:cursor-not-allowed"
@@ -277,10 +281,10 @@ const Services = () => {
           )}
         </motion.div>
 
-        {/* Loading State */}
+        {/* Loading / Content */}
         <AnimatePresence mode="wait">
           {loading ? (
-            <motion.div 
+            <motion.div
               className="flex justify-center items-center py-32"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -288,12 +292,12 @@ const Services = () => {
               key="loading"
             >
               <div className="flex flex-col items-center space-y-4">
-                <motion.div 
+                <motion.div
                   className="w-16 h-16 border-4 border-[#F3C625] border-t-transparent rounded-full"
                   animate={{ rotate: 360 }}
                   transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                 />
-                <motion.p 
+                <motion.p
                   className="text-gray-500 text-lg font-medium"
                   animate={{ opacity: [0.5, 1, 0.5] }}
                   transition={{ duration: 1.5, repeat: Infinity }}
@@ -310,7 +314,6 @@ const Services = () => {
               exit="exit"
               variants={pageVariants}
             >
-              {/* Services Grid */}
               {services.length === 0 ? (
                 <motion.div 
                   className="text-center py-32"
@@ -348,158 +351,173 @@ const Services = () => {
                   )}
                 </motion.div>
               ) : (
-                <motion.div 
-                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
-                  variants={containerVariants}
-                  initial="hidden"
-                  animate="visible"
-                >
-                  {services.map((service) => (
-                    <motion.div
-                      key={service.ServiceID}
-                      variants={cardVariants}
-                      whileHover={{ y: -8 }}
-                      className="group cursor-pointer"
-                    >
-                      <motion.div 
-                        className="bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-100 h-full flex flex-col relative"
-                        whileHover={{ 
-                          boxShadow: "0 20px 40px rgba(0,0,0,0.1)",
-                        }}
-                        transition={{ duration: 0.3 }}
+                <>
+                  <motion.div
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="visible"
+                  >
+                    {services.map((service) => (
+                      <motion.div
+                        key={service.ServiceID}
+                        variants={cardVariants}
+                        whileHover={{ y: -8 }}
+                        className="group cursor-pointer"
+                        onClick={() => handleLearnMore(service.ServiceID)}
                       >
-                        {/* Gradient Overlay on Hover */}
-                        <motion.div 
-                          className="absolute inset-0 bg-gradient-to-br from-[#F3C625]/5 to-[#f8d75a]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-                        />
-                        
-                        {/* Card Header with Accent */}
-                        <motion.div 
-                          className="h-1 bg-gradient-to-r from-[#C3C3C3] to-[#F3C625]"
-                          initial={{ scaleX: 0 }}
-                          animate={{ scaleX: 1 }}
-                          transition={{ duration: 0.5, delay: 0.2 }}
-                        />
-                        
-                        {/* Card Content */}
-                        <div className="p-8 flex-1 flex flex-col relative z-10">
-                          {/* Service Icon */}
-                          <motion.div 
-                            className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#F3C625] to-[#f8d75a] flex items-center justify-center mb-6 shadow-md"
-                            variants={iconVariants}
-                            initial="initial"
-                            whileHover="hover"
-                          >
-                            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                            </svg>
-                          </motion.div>
-
-                          {/* Service Name */}
-                          <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-[#F3C625] transition-colors duration-300">
-                            {service.ServiceName}
-                          </h3>
-
-                          {/* Description */}
-                          <p className="text-gray-600 leading-relaxed flex-1 line-clamp-4">
-                            {service.Description || "Professional service tailored to meet your specific requirements and exceed expectations."}
-                          </p>
-
-                          {/* Action Button */}
-                          <motion.div 
-                            className="mt-6 pt-6 border-t border-gray-100"
-                          >
-                            <motion.button 
-                              className="flex-1 flex flex-wrap items-center cursor-pointer justify-center gap-2 px-4 py-3 rounded-xl bg-[#000] text-white font-semibold shadow-md hover:shadow-lg transition-all duration-300 relative overflow-hidden"
-                              whileHover={{ scale: 1.02, y: -2 }}
-                              whileTap={{ scale: 0.98 }}
-                              onClick={() => handleLearnMore(service.ServiceID)}
-                            >
-                              Learn More
-                              <motion.svg 
-                                className="w-5 h-5" 
-                                fill="none" 
-                                stroke="currentColor" 
-                                viewBox="0 0 24 24"
-                                animate={{ x: [0, 3, 0] }}
-                                transition={{ duration: 1.5, repeat: Infinity }}
-                              > 
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                              </motion.svg>
-                            </motion.button>
-                          </motion.div>
-                        </div>
-                      </motion.div>
-                    </motion.div>
-                  ))}
-                </motion.div>
-              )}
-
-              {/* Pagination */}
-              {services.length > 0 && (
-                <motion.div 
-                  className="flex flex-col sm:flex-row justify-between items-center gap-6 mt-16"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.3 }}
-                >
-                  <motion.button
-                    className="flex items-center px-6 py-3 rounded-2xl bg-white text-gray-700 font-semibold shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed border border-gray-200"
-                    onClick={() => setPage(p => Math.max(1, p - 1))}
-                    disabled={page === 1}
-                    whileHover={{ scale: page === 1 ? 1 : 1.05, x: page === 1 ? 0 : -5 }}
-                    whileTap={{ scale: page === 1 ? 1 : 0.95 }}
-                  >
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                    </svg>
-                    Previous
-                  </motion.button>
-                  
-                  <div className="flex items-center space-x-2">
-                    {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                      let pageNum;
-                      if (totalPages <= 5) {
-                        pageNum = i + 1;
-                      } else if (page <= 3) {
-                        pageNum = i + 1;
-                      } else if (page >= totalPages - 2) {
-                        pageNum = totalPages - 4 + i;
-                      } else {
-                        pageNum = page - 2 + i;
-                      }
-                      
-                      return (
-                        <motion.button
-                          key={pageNum}
-                          onClick={() => setPage(pageNum)}
-                          className={`w-11 h-11 rounded-xl font-semibold transition-all duration-300 ${
-                            page === pageNum
-                              ? 'bg-gradient-to-br from-[#F3C625] to-[#f8d75a] text-white shadow-lg'
-                              : 'text-gray-600 hover:bg-gray-100 border border-gray-200'
-                          }`}
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.95 }}
+                        <motion.div
+                          className="bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-100 h-full flex flex-col relative"
+                          whileHover={{
+                            boxShadow: "0 20px 40px rgba(0,0,0,0.1)",
+                          }}
+                          transition={{ duration: 0.3 }}
                         >
-                          {pageNum}
-                        </motion.button>
-                      );
-                    })}
-                  </div>
+                          {/* Gradient Overlay on Hover */}
+                          <motion.div 
+                            className="absolute inset-0 bg-gradient-to-br from-[#F3C625]/5 to-[#f8d75a]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                          />
+                          
+                          {/* Card Header with Accent */}
+                          <motion.div 
+                            className="h-1 bg-gradient-to-r from-[#C3C3C3] to-[#F3C625]"
+                            initial={{ scaleX: 0 }}
+                            animate={{ scaleX: 1 }}
+                            transition={{ duration: 0.5, delay: 0.2 }}
+                          />
+                          
+                          <div className="p-8 flex-1 flex flex-col relative z-10">
+                            <motion.div
+                              className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#F3C625] to-[#f8d75a] flex items-center justify-center mb-6 shadow-md"
+                              variants={iconVariants}
+                              initial="initial"
+                              whileHover="hover"
+                            >
+                              <svg
+                                className="w-8 h-8 text-white"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M13 10V3L4 14h7v7l9-11h-7z"
+                                />
+                              </svg>
+                            </motion.div>
 
-                  <motion.button
-                    className="flex items-center px-6 py-3 rounded-2xl bg-white text-gray-700 font-semibold shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed border border-gray-200"
-                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                    disabled={page === totalPages}
-                    whileHover={{ scale: page === totalPages ? 1 : 1.05, x: page === totalPages ? 0 : 5 }}
-                    whileTap={{ scale: page === totalPages ? 1 : 0.95 }}
-                  >
-                    Next
-                    <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </motion.button>
-                </motion.div>
+                            <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-[#F3C625] transition-colors duration-300">
+                              {service.ServiceName}
+                            </h3>
+
+                            <p className="text-gray-600 leading-relaxed flex-1 line-clamp-4">
+                              {service.Description ||
+                                "Professional service tailored to meet your specific requirements."}
+                            </p>
+
+                            <motion.div className="mt-6 pt-6 border-t border-gray-100">
+                              <motion.button
+                                className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-black text-white font-semibold shadow-md hover:shadow-lg transition-all duration-300 w-full"
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleLearnMore(service.ServiceID);
+                                }}
+                              >
+                                Learn More
+                                <motion.svg
+                                  className="w-5 h-5"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                  animate={{ x: [0, 3, 0] }}
+                                  transition={{ duration: 1.5, repeat: Infinity }}
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M9 5l7 7-7 7"
+                                  />
+                                </motion.svg>
+                              </motion.button>
+                            </motion.div>
+                          </div>
+                        </motion.div>
+                      </motion.div>
+                    ))}
+                  </motion.div>
+
+                  {/* Pagination Component */}
+                  {services.length > 0 && (
+                    <motion.div 
+                      className="flex flex-col sm:flex-row justify-between items-center gap-6 mt-16"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.3 }}
+                    >
+                      <motion.button
+                        className="flex items-center px-6 py-3 rounded-2xl bg-white text-gray-700 font-semibold shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed border border-gray-200"
+                        onClick={() => setPage(p => Math.max(1, p - 1))}
+                        disabled={page === 1}
+                        whileHover={{ scale: page === 1 ? 1 : 1.05, x: page === 1 ? 0 : -5 }}
+                        whileTap={{ scale: page === 1 ? 1 : 0.95 }}
+                      >
+                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                        Previous
+                      </motion.button>
+                      
+                      <div className="flex items-center space-x-2">
+                        {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                          let pageNum;
+                          if (totalPages <= 5) {
+                            pageNum = i + 1;
+                          } else if (page <= 3) {
+                            pageNum = i + 1;
+                          } else if (page >= totalPages - 2) {
+                            pageNum = totalPages - 4 + i;
+                          } else {
+                            pageNum = page - 2 + i;
+                          }
+                          
+                          return (
+                            <motion.button
+                              key={pageNum}
+                              onClick={() => setPage(pageNum)}
+                              className={`w-11 h-11 rounded-xl font-semibold transition-all duration-300 ${
+                                page === pageNum
+                                  ? 'bg-gradient-to-br from-[#F3C625] to-[#f8d75a] text-white shadow-lg'
+                                  : 'text-gray-600 hover:bg-gray-100 border border-gray-200'
+                              }`}
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.95 }}
+                            >
+                              {pageNum}
+                            </motion.button>
+                          );
+                        })}
+                      </div>
+
+                      <motion.button
+                        className="flex items-center px-6 py-3 rounded-2xl bg-white text-gray-700 font-semibold shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed border border-gray-200"
+                        onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                        disabled={page === totalPages}
+                        whileHover={{ scale: page === totalPages ? 1 : 1.05, x: page === totalPages ? 0 : 5 }}
+                        whileTap={{ scale: page === totalPages ? 1 : 0.95 }}
+                      >
+                        Next
+                        <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </motion.button>
+                    </motion.div>
+                  )}
+                </>
               )}
             </motion.div>
           )}

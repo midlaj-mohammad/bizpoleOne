@@ -97,7 +97,7 @@ const ComplianceDashboard = () => {
   }, [JSON.stringify(companyQuotes), selectedCompany?.CompanyID]);
 
   const handleViewDetails = (quote = null) => {
-    const targetQuoteId = quote ? quote.QuoteID : quoteId;
+    const targetQuoteId = quote ? quote.QuoteID : quoteId;0
     if (!targetQuoteId) {
       alert("Quote ID not found");
       return;
